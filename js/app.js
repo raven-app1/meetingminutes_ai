@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     txtCloudNoticeDesc: document.getElementById('txt-cloudNoticeDesc'),
     txtMethod2DevBadge: document.getElementById('txt-method2DevBadge'),
     // Result
+    resultCard: document.getElementById('resultCard'),
     resultToolbar: document.querySelector('.result-toolbar'),
     resultTabs: document.querySelectorAll('.result-tab-btn'),
     resultFormattedView: document.getElementById('resultFormattedView'),
@@ -119,6 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnDownloadTxt: document.getElementById('btnDownloadTxt'),
     btnPrintPdf: document.getElementById('btnPrintPdf'),
     btnSaveHistory: document.getElementById('btnSaveHistory'),
+    // Mobile Navigation
+    mobileQuickJumpBtn: document.getElementById('mobileQuickJumpBtn'),
+    mobileJumpIcon: document.getElementById('mobileJumpIcon'),
+    txtMobileJump: document.getElementById('txt-mobileJump'),
     // Antigravity Tab
     btnCopyAgPrompt: document.getElementById('btnCopyAgPrompt'),
     agPasteResultInput: document.getElementById('agPasteResultInput'),
@@ -487,6 +492,40 @@ document.addEventListener('DOMContentLoaded', () => {
       storage.setSetting('model', model);
       showToast(state.currentLang === 'my' ? 'ချိန်ညှိချက်များ သိမ်းဆည်းပြီးပါပြီ' : 'Settings saved');
     });
+
+    // Mobile Quick Jump Pill
+    if (elements.mobileQuickJumpBtn) {
+      let isScrolledDown = false;
+
+      function updateJumpBtnState() {
+        if (state.currentTab !== 'studio' || !elements.resultCard) return;
+        const resultOffset = elements.resultCard.offsetTop;
+        const currentScroll = window.scrollY || window.pageYOffset;
+        if (currentScroll >= resultOffset - 120) {
+          if (!isScrolledDown) {
+            isScrolledDown = true;
+            if (elements.mobileJumpIcon) elements.mobileJumpIcon.textContent = '⬆';
+            if (elements.txtMobileJump) elements.txtMobileJump.textContent = t('mobileJumpTop');
+          }
+        } else {
+          if (isScrolledDown) {
+            isScrolledDown = false;
+            if (elements.mobileJumpIcon) elements.mobileJumpIcon.textContent = '⬇';
+            if (elements.txtMobileJump) elements.txtMobileJump.textContent = t('mobileJump');
+          }
+        }
+      }
+
+      window.addEventListener('scroll', updateJumpBtnState, { passive: true });
+
+      elements.mobileQuickJumpBtn.addEventListener('click', () => {
+        if (isScrolledDown) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (elements.resultCard) {
+          elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
   }
 
   // --- Quick Paste Modal Controllers ---
@@ -519,6 +558,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab !== 'studio') {
       switchMainTab('studio');
     }
+    if (elements.resultCard && window.innerWidth <= 960) {
+      elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     showToast(t('alertSuccessGenerated'));
   }
 
@@ -533,6 +575,11 @@ document.addEventListener('DOMContentLoaded', () => {
       pane.classList.toggle('hidden', pane.id !== `tabContent-${tabId}`);
       pane.classList.toggle('active', pane.id === `tabContent-${tabId}`);
     });
+
+    if (elements.mobileQuickJumpBtn) {
+      elements.mobileQuickJumpBtn.style.display = tabId === 'studio' ? '' : 'none';
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
 
     if (tabId === 'history') {
       renderHistoryList();
@@ -687,6 +734,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.meetingTitleInput.value = state.currentLang === 'my' ? SAMPLE_MEETING.title : SAMPLE_MEETING.titleEn;
         if (sampleOutput) {
           setGeneratedResult(sampleOutput);
+          if (elements.resultCard && window.innerWidth <= 960) {
+            elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
           showToast(state.currentLang === 'my' ? 'နမူနာ အစည်းအဝေး ရလဒ်ကို ဖွင့်ပြထားပါသည်!' : 'Sample meeting minutes loaded!');
         }
       });
@@ -931,6 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (show) {
       elements.statusBannerTitle.textContent = title;
       elements.statusBanner.classList.remove('hidden');
+      if (elements.statusBanner && window.innerWidth <= 960) {
+        elements.statusBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       [elements.generateBtn, elements.generateAgBtn, elements.btnQuickBridgeRun].forEach(btn => {
         if (btn) {
           btn.disabled = true;
@@ -1115,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${m.audioName ? `<span>🎙️ ${escapeHtml(m.audioName)}</span>` : ''}
           </div>
         </div>
-        <div style="display:flex; gap:0.5rem;">
+        <div class="history-item-actions">
           <button class="btn btn-secondary btn-sm btn-load-history" title="${t('loadRecord')}">
             ↗ ${t('loadRecord')}
           </button>

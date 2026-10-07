@@ -189,7 +189,9 @@ const translations = {
     modalPastePlaceholder: "Gemini မှ ထွက်ရှိလာသော စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ...",
     rawMarkdownPlaceholder: "Markdown စာသားများကို ဤနေရာတွင် တိုက်ရိုက် ပြင်ဆင်ရေးသားနိုင်ပါသည်...",
     loadSampleOutputBtn: "နမူနာ မှတ်တမ်း ရလဒ် တိုက်ရိုက်ကြည့်ရှုမည်",
-    jumpToAgLink: "အသေးစိတ် လမ်းညွှန်ကြည့်ရန် ↗"
+    jumpToAgLink: "အသေးစိတ် လမ်းညွှန်ကြည့်ရန် ↗",
+    mobileJump: "ရလဒ်သို့",
+    mobileJumpTop: "ထိပ်သို့"
   },
 
   en: {
@@ -377,7 +379,9 @@ const translations = {
     modalPastePlaceholder: "Paste the generated meeting minutes text from Gemini Web here...",
     rawMarkdownPlaceholder: "Edit the raw Markdown text directly here...",
     loadSampleOutputBtn: "Preview Sample Output Directly",
-    jumpToAgLink: "View Guide ↗"
+    jumpToAgLink: "View Guide ↗",
+    mobileJump: "To Results",
+    mobileJumpTop: "To Top"
   }
 };
 

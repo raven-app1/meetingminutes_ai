@@ -2,7 +2,12 @@
 <html lang="my">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
   <title>အစည်းအဝေး မှတ်တမ်း AI - Burmese Meeting Minutes AI</title>
   
   <!-- Myanmar Unicode Fonts -->
@@ -128,8 +133,8 @@
             <!-- Audio Player View (Shown when audio loaded) -->
             <div id="audioPlayerBox" class="audio-player-box hidden">
               <div class="audio-file-meta">
-                <span id="audioFileNameDisplay" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">audio.mp3</span>
-                <span id="audioSizeDisplay" style="color:var(--text-muted);">0 MB</span>
+                <span id="audioFileNameDisplay" class="audio-file-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">audio.mp3</span>
+                <span id="audioSizeDisplay" style="color:var(--text-muted); flex-shrink:0;">0 MB</span>
               </div>
               <canvas id="audioWaveCanvas" class="waveform-canvas" width="400" height="60"></canvas>
               <div class="audio-controls">
@@ -248,7 +253,7 @@
             <!-- Execution Mode Tabs -->
             <div class="form-group" style="margin-bottom:0.75rem;">
               <label style="font-weight:600; color:#38bdf8; font-size:0.86rem;" id="txt-execModeLabel">လုပ်ဆောင်မည့် နည်းလမ်း ရွေးချယ်ပါ:</label>
-              <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:0.5rem; margin-top:0.4rem;">
+              <div class="exec-mode-switch">
                 <button type="button" id="btnModeAntigravity" class="btn btn-secondary active-method" style="font-size:0.8rem; padding:0.55rem 0.4rem; text-align:center;">
                   <span id="txt-execModeAntigravity">⚡ Antigravity / Zero Key</span>
                 </button>
@@ -280,7 +285,7 @@
                 ✨ <span id="txt-generateBtn">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦</span>
               </button>
 
-              <div id="bridgeSubActionGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
+              <div id="bridgeSubActionGrid" class="bridge-sub-actions">
                 <button id="btnQuickBridgeRun" type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; border-color:rgba(52, 211, 153, 0.4); color:#34d399; padding:0.4rem 0.3rem;">
                   ⚡ <span id="txt-runViaBridgeBtn">Local Bridge</span>
                 </button>
@@ -376,7 +381,7 @@
             <div class="result-content-container">
               <!-- Pane 1: Rendered HTML View -->
               <div id="resultFormattedView" class="minutes-rendered">
-                <div style="text-align:center; padding:5rem 2rem; color:var(--text-muted);">
+                <div class="empty-state-wrap" style="text-align:center; padding:5rem 2rem; color:var(--text-muted);">
                   <div style="font-size:3rem; margin-bottom:1rem;">🎙️ ✨ 📋</div>
                   <h3 style="font-size:1.2rem; color:#f1f5f9; margin-bottom:0.5rem;" id="txt-emptyStateTitle">အစည်းအဝေး မှတ်တမ်း မထုတ်ယူရသေးပါ</h3>
                   <p style="font-size:0.9rem; max-width:480px; margin:0 auto;" id="txt-emptyStateDesc">
@@ -604,6 +609,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Mobile Quick Jump Button -->
+  <button id="mobileQuickJumpBtn" class="mobile-jump-btn" aria-label="Jump to results">
+    <span id="mobileJumpIcon">⬇</span> <span id="txt-mobileJump">ရလဒ်သို့</span>
+  </button>
 
   <!-- Toast Notification element -->
   <div id="toast" class="toast"></div>
