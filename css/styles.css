@@ -670,6 +670,32 @@ body {
   margin-bottom: 0.4rem;
 }
 
+.minutes-list li.sub-item, .minutes-ordered-list li.sub-item {
+  margin-left: 1.4rem;
+  opacity: 0.95;
+}
+
+.task-item.sub-item {
+  margin-left: 1.4rem;
+  opacity: 0.95;
+}
+
+.minutes-link {
+  color: #38bdf8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.minutes-link:hover {
+  color: #7dd3fc;
+}
+
+del {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
 .minutes-quote {
   border-left: 3px solid #38bdf8;
   background-color: rgba(56, 189, 248, 0.05);
@@ -957,6 +983,11 @@ body {
   .minutes-table th, .minutes-table td {
     border: 1pt solid #cbd5e1 !important;
     color: #000 !important;
+  }
+
+  .minutes-link {
+    color: #0369a1 !important;
+    text-decoration: underline !important;
   }
 }
 

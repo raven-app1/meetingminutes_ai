@@ -96,7 +96,22 @@ class AudioEngine {
   }
 
   pause() {
-    this.audioElement.pause();
+    if (this.audioElement) {
+      this.audioElement.pause();
+    }
+  }
+
+  clearAudio() {
+    this.pause();
+    if (this.audioUrl) {
+      URL.revokeObjectURL(this.audioUrl);
+      this.audioUrl = null;
+    }
+    this.currentBlob = null;
+    this.currentFile = null;
+    if (this.audioElement) {
+      this.audioElement.src = '';
+    }
   }
 
   togglePlay() {

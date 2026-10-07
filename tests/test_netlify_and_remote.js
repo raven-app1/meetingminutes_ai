@@ -90,6 +90,8 @@ test('index.html contains Quick Paste Modal, studio quick paste button, and clou
   assert.ok(html.includes('id="btnQuickPasteStudio"'), 'Must contain btnQuickPasteStudio in subaction grid');
   assert.ok(html.includes('id="cloudNoticeBox"'), 'Must contain cloudNoticeBox in Method 2');
   assert.ok(html.includes('id="txt-method2DevBadge"'), 'Must contain txt-method2DevBadge');
+  assert.ok(html.includes('id="jumpToAntigravityLink"'), 'Must contain jumpToAntigravityLink in bridge status box');
+  assert.ok(html.includes('id="btnDownloadTxt"'), 'Must contain btnDownloadTxt in toolbar');
 });
 
 test('netlify.toml and _headers avoid stale 1-year caching on unhashed static assets', () => {

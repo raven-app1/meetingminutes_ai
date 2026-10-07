@@ -19,6 +19,8 @@ class DocumentExporter {
     let inList = false;
     let listType = ''; // 'ul' or 'ol'
     let inCode = false;
+    let inQuote = false;
+    let quoteLines = [];
 
     function flushTable() {
       if (!inTable) return;
@@ -47,6 +49,13 @@ class DocumentExporter {
       listType = '';
     }
 
+    function flushQuote() {
+      if (!inQuote) return;
+      html.push(`<blockquote class="minutes-quote">${quoteLines.map(l => DocumentExporter.inlineFormat(l)).join('<br />')}</blockquote>`);
+      inQuote = false;
+      quoteLines = [];
+    }
+
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
 
@@ -54,6 +63,7 @@ class DocumentExporter {
       if (line.trim().startsWith('```')) {
         flushTable();
         flushList();
+        flushQuote();
         if (!inCode) {
           inCode = true;
           html.push('<pre><code>');
@@ -66,6 +76,17 @@ class DocumentExporter {
       if (inCode) {
         html.push(DocumentExporter.escapeHtml(line));
         continue;
+      }
+
+      // Blockquotes (> )
+      if (line.trim().startsWith('> ') || line.trim() === '>') {
+        flushTable();
+        flushList();
+        inQuote = true;
+        quoteLines.push(line.trim().startsWith('> ') ? line.trim().slice(2) : '');
+        continue;
+      } else if (inQuote) {
+        flushQuote();
       }
 
       // Table lines: | col1 | col2 |
@@ -116,7 +137,7 @@ class DocumentExporter {
       }
 
       // Task list item: - [ ] or - [x]
-      const taskMatch = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)/);
+      const taskMatch = line.match(/^(\s*)(?:[-*]|\d+\.)\s+\[([ xX])\]\s+(.*)/);
       if (taskMatch) {
         if (!inList || listType !== 'ul') {
           flushList();
@@ -124,13 +145,14 @@ class DocumentExporter {
           listType = 'ul';
           html.push('<ul class="minutes-task-list">');
         }
-        const checked = taskMatch[1].toLowerCase() === 'x' ? 'checked' : '';
-        html.push(`<li class="task-item"><label><input type="checkbox" ${checked} class="task-checkbox" /> <span>${DocumentExporter.inlineFormat(taskMatch[2])}</span></label></li>`);
+        const isIndented = taskMatch[1].length > 0;
+        const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
+        html.push(`<li class="task-item${isIndented ? ' sub-item' : ''}"><label><input type="checkbox" ${checked} class="task-checkbox" /> <span>${DocumentExporter.inlineFormat(taskMatch[3])}</span></label></li>`);
         continue;
       }
 
-      // Bullet lists (- or *)
-      const bulletMatch = line.match(/^[-*]\s+(.*)/);
+      // Bullet lists (- or * or +)
+      const bulletMatch = line.match(/^(\s*)([-*+]|\+)\s+(.*)/);
       if (bulletMatch) {
         if (!inList || listType !== 'ul') {
           flushList();
@@ -138,12 +160,13 @@ class DocumentExporter {
           listType = 'ul';
           html.push('<ul class="minutes-list">');
         }
-        html.push(`<li>${DocumentExporter.inlineFormat(bulletMatch[1])}</li>`);
+        const isIndented = bulletMatch[1].length > 0;
+        html.push(`<li${isIndented ? ' class="sub-item"' : ''}>${DocumentExporter.inlineFormat(bulletMatch[3])}</li>`);
         continue;
       }
 
       // Numbered lists (1. 2.)
-      const numMatch = line.match(/^(\d+)\.\s+(.*)/);
+      const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)/);
       if (numMatch) {
         if (!inList || listType !== 'ol') {
           flushList();
@@ -151,14 +174,8 @@ class DocumentExporter {
           listType = 'ol';
           html.push('<ol class="minutes-ordered-list">');
         }
-        html.push(`<li>${DocumentExporter.inlineFormat(numMatch[2])}</li>`);
-        continue;
-      }
-
-      // Blockquotes (> )
-      if (line.startsWith('> ')) {
-        flushList();
-        html.push(`<blockquote class="minutes-quote">${DocumentExporter.inlineFormat(line.slice(2))}</blockquote>`);
+        const isIndented = numMatch[1].length > 0;
+        html.push(`<li${isIndented ? ' class="sub-item"' : ''}>${DocumentExporter.inlineFormat(numMatch[3])}</li>`);
         continue;
       }
 
@@ -169,6 +186,7 @@ class DocumentExporter {
 
     flushTable();
     flushList();
+    flushQuote();
 
     return html.join('\n');
   }
@@ -176,13 +194,35 @@ class DocumentExporter {
   static inlineFormat(text) {
     if (!text) return '';
     let res = DocumentExporter.escapeHtml(text);
-    // Bold: **text** or __text__
-    res = res.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    res = res.replace(/__(.*?)__/g, '<strong>$1</strong>');
-    // Italic: *text* or _text_
-    res = res.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    // Inline code: `code`
-    res = res.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+    // 1. Protect inline code with tokens
+    const codeTokens = [];
+    res = res.replace(/`([^`]+)`/g, (match, code) => {
+      codeTokens.push(`<code class="inline-code">${code}</code>`);
+      return `@@@CODE_${codeTokens.length - 1}@@@`;
+    });
+
+    // 2. Markdown Links: [text](url) - allow safe URLs only
+    res = res.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+|mailto:[^\s\)]+|#[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="minutes-link">$1</a>');
+
+    // 3. Bold + Italic: ***text*** or ___text___
+    res = res.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    res = res.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
+
+    // 4. Bold: **text** or __text__
+    res = res.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    res = res.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+    // 5. Italic: *text* or _text_
+    res = res.replace(/\*([^\*]+?)\*/g, '<em>$1</em>');
+    res = res.replace(/(^|[\s(])_([^_]+?)_([\s).,!?;:]|$)/g, '$1<em>$2</em>$3');
+
+    // 6. Strikethrough: ~~text~~
+    res = res.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+    // 7. Restore inline code
+    res = res.replace(/@@@CODE_(\d+)@@@/g, (match, idx) => codeTokens[Number(idx)]);
+
     return res;
   }
 
@@ -219,18 +259,21 @@ class DocumentExporter {
       }
 
       // Check for Table Headers
-      if (line.includes('|') && (line.includes('တာဝန်') || /action|task/i.test(line))) {
+      if (line.includes('|') && (line.includes('တာဝန်') || line.includes('အစီအမံ') || /action|task|to-?do/i.test(line))) {
         inActionTable = true;
         colIndices = { task: -1, owner: -1, due: -1, priority: -1 };
         const headers = line.split('|').map(h => h.trim().toLowerCase());
         headers.forEach((h, idx) => {
-          if (h.includes('တာဝန်ခံ') || h.includes('owner') || h.includes('assignee')) {
+          if (!h) return;
+          if (/(တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|responsible|person)/i.test(h)) {
             colIndices.owner = idx;
-          } else if (h.includes('တာဝန်') || h.includes('action') || h.includes('task')) {
+          } else if (/(ရက်|ရက်စွဲ|သတ်မှတ်ရက်|due|deadline|date|timeline)/i.test(h)) {
+            colIndices.due = idx;
+          } else if (/(ဦးစားပေး|priority|level)/i.test(h)) {
+            colIndices.priority = idx;
+          } else if (/(လုပ်ဆောင်ရန်|အစီအမံ|လုပ်ငန်း|task|action|to-?do|agenda|အကြောင်းအရာ|ဆွေးနွေးချက်|အကြောင်း)/i.test(h) || (h.includes('တာဝန်') && !/(ခံ|ယူ|ရှိ|ကျ)/.test(h))) {
             colIndices.task = idx;
           }
-          if (h.includes('ရက်') || h.includes('due') || h.includes('deadline')) colIndices.due = idx;
-          if (h.includes('ဦးစားပေး') || h.includes('priority')) colIndices.priority = idx;
         });
         continue;
       }
@@ -239,21 +282,41 @@ class DocumentExporter {
         if (/^[\s|:-]+$/.test(line)) continue;
         const cells = line.split('|').map(c => c.trim());
         if (cells.length > 2) {
-          // If task col index is not found, search for the cell with meaningful text (skip index 0 empty, index 1 number)
           let task = '';
           if (colIndices.task !== -1 && cells[colIndices.task]) {
             task = cells[colIndices.task];
           } else {
             for (let c = 1; c < cells.length; c++) {
+              if (c === colIndices.owner || c === colIndices.due || c === colIndices.priority) continue;
               if (cells[c] && !/^[\d\u1040-\u1049.\s-]+$/.test(cells[c])) {
                 task = cells[c];
                 break;
               }
             }
           }
-          const owner = colIndices.owner !== -1 ? cells[colIndices.owner] : (cells[2] || '-');
-          const due = colIndices.due !== -1 ? cells[colIndices.due] : (cells[3] || '-');
-          const priority = colIndices.priority !== -1 ? cells[colIndices.priority] : (cells[4] || '-');
+
+          const hasMatchedHeaders = (colIndices.task !== -1 || colIndices.owner !== -1 || colIndices.due !== -1 || colIndices.priority !== -1);
+
+          let owner = '-';
+          if (colIndices.owner !== -1 && cells[colIndices.owner]) {
+            owner = cells[colIndices.owner];
+          } else if (!hasMatchedHeaders && cells[2]) {
+            owner = cells[2];
+          }
+
+          let due = '-';
+          if (colIndices.due !== -1 && cells[colIndices.due]) {
+            due = cells[colIndices.due];
+          } else if (!hasMatchedHeaders && cells[3]) {
+            due = cells[3];
+          }
+
+          let priority = '-';
+          if (colIndices.priority !== -1 && cells[colIndices.priority]) {
+            priority = cells[colIndices.priority];
+          } else if (!hasMatchedHeaders && cells[4]) {
+            priority = cells[4];
+          }
 
           if (task && !task.startsWith('---') && !/^(လုပ်ဆောင်ရန် တာဝန်|task|action item)$/i.test(task)) {
             items.push({
@@ -272,10 +335,10 @@ class DocumentExporter {
       }
 
       // Check for Checklist item: - [ ] or - [x]
-      const checklistMatch = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)/);
+      const checklistMatch = line.match(/^(\s*)(?:[-*]|\d+\.)\s+\[([ xX])\]\s+(.*)/);
       if (checklistMatch) {
-        const isChecked = checklistMatch[1].toLowerCase() === 'x';
-        const taskText = checklistMatch[2];
+        const isChecked = checklistMatch[2].toLowerCase() === 'x';
+        const taskText = checklistMatch[3];
         const parsed = DocumentExporter._parseTaskMeta(taskText);
         items.push({
           id: 'task_' + items.length,
@@ -290,9 +353,9 @@ class DocumentExporter {
 
       // Check for bullet or numbered list inside Action Items section
       if (inActionSection) {
-        const listMatch = line.match(/^([-*]|\d+\.)\s+(.*)/);
+        const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/);
         if (listMatch) {
-          const content = listMatch[2].trim();
+          const content = listMatch[3].trim();
           if (content && content.length > 3) {
             const parsed = DocumentExporter._parseTaskMeta(content);
             items.push({
@@ -331,17 +394,17 @@ class DocumentExporter {
     }
 
     owner = extractField([
-      /(?:တာဝန်ခံ|owner|assignee)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline|ဦးစားပေး|priority)|$))/i,
-      /(?:တာဝန်ခံ|owner|assignee)\s*[:：\-]\s*([^,;|()]+)/i
+      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline|ဦးစားပေး|priority)|$))/i,
+      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic)\s*[:：\-]\s*([^,;|()]+)/i
     ]);
 
     due = extractField([
-      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|owner|assignee|ဦးစားပေး|priority)|$))/i,
+      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|ဦးစားပေး|priority)|$))/i,
       /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+)/i
     ]);
 
     priority = extractField([
-      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|owner|assignee|သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)|$))/i,
+      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)|$))/i,
       /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+)/i
     ]);
 
@@ -505,6 +568,9 @@ class DocumentExporter {
     // Legacy fallback
     const textarea = document.createElement('textarea');
     textarea.value = markdownContent;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '0';
     document.body.appendChild(textarea);
     textarea.select();
     document.execCommand('copy');

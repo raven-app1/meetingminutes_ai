@@ -175,7 +175,17 @@ const translations = {
     method2DevBadge: "(Local Development အတွက်သာ)",
     quickPasteStudioBtn: "📋 ရလဒ် ထည့်မည်",
     promptCopiedToast: "Gemini Web Prompt Bundle ကို Copy ကူးပြီးပါပြီ! Gemini Web တွင် အသံဖိုင်နှင့်အတူ Paste လုပ်ပါ",
-    openGeminiWebDirectBtn: "Gemini Web ဖွင့်မည် ↗"
+    openGeminiWebDirectBtn: "Gemini Web ဖွင့်မည် ↗",
+    bridgeStatusDesc: "Antigravity subscription ဖြင့် API Key မလိုဘဲ မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်။",
+    tabSettingsTitle: "ချိန်ညှိချက်များ (Settings)",
+    settingsApiKeyLabel: "Google AI Studio API Key:",
+    emptyStateTitle: "အစည်းအဝေး မှတ်တမ်း မထုတ်ယူရသေးပါ",
+    emptyStateDesc: "ဘယ်ဘက်တွင် မြန်မာအသံဖိုင် ရွေးချယ်ပြီး လိုချင်သော ပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ် သို့မဟုတ် တာဝန်များ) ကို ရွေးချယ်ကာ 'မှတ်တမ်း ထုတ်ယူမည်' ကို နှိပ်ပါ သို့မဟုတ် 'နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ' ဖြင့် စမ်းသပ်ကြည့်နိုင်ပါသည်။",
+    recordHint: "Microphone ဖွင့်ပြီး မြန်မာလို တိုက်ရိုက် အသံဖမ်းယူနိုင်ပါသည်",
+    btnSaveSettings: "သိမ်းဆည်းမည် (Save Settings)",
+    btnCheckBridge: "ပြန်လည်စစ်ဆေးမည် 🔄",
+    transcriptInputLabel: "သို့မဟုတ် စာသား/Transcript တိုက်ရိုက် ထည့်သွင်းရန်:",
+    jumpToAgLink: "အသေးစိတ် လမ်းညွှန်ကြည့်ရန် ↗"
   },
 
   en: {
@@ -349,7 +359,17 @@ const translations = {
     method2DevBadge: "(Local Development Only)",
     quickPasteStudioBtn: "📋 Paste Result",
     promptCopiedToast: "Gemini Web prompt bundle copied! Paste into Gemini Web with your audio file",
-    openGeminiWebDirectBtn: "Open Gemini Web ↗"
+    openGeminiWebDirectBtn: "Open Gemini Web ↗",
+    bridgeStatusDesc: "Generate minutes with your Antigravity subscription without needing an API key.",
+    tabSettingsTitle: "Settings",
+    settingsApiKeyLabel: "Google AI Studio API Key:",
+    emptyStateTitle: "No Meeting Minutes Generated Yet",
+    emptyStateDesc: "Select a Burmese audio file on the left, choose your desired minutes format (Summary, Detailed, or Tasks), and click 'Generate Minutes' or try the sample meeting!",
+    recordHint: "Turn on microphone and speak in Burmese to record directly",
+    btnSaveSettings: "Save Settings",
+    btnCheckBridge: "Re-check 🔄",
+    transcriptInputLabel: "Or enter Meeting Notes / Spoken Transcript directly:",
+    jumpToAgLink: "View Guide ↗"
   }
 };
 

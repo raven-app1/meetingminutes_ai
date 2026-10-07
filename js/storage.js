@@ -23,26 +23,31 @@ class StorageManager {
         return;
       }
 
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains(STORE_MEETINGS)) {
-          const store = db.createObjectStore(STORE_MEETINGS, { keyPath: 'id' });
-          store.createIndex('timestamp', 'timestamp', { unique: false });
-          store.createIndex('title', 'title', { unique: false });
-        }
-      };
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_MEETINGS)) {
+            const store = db.createObjectStore(STORE_MEETINGS, { keyPath: 'id' });
+            store.createIndex('timestamp', 'timestamp', { unique: false });
+            store.createIndex('title', 'title', { unique: false });
+          }
+        };
 
-      request.onsuccess = (event) => {
-        this.db = event.target.result;
-        resolve(this.db);
-      };
+        request.onsuccess = (event) => {
+          this.db = event.target.result;
+          resolve(this.db);
+        };
 
-      request.onerror = (event) => {
-        console.warn("IndexedDB failed to open, using fallback:", event.target.error);
+        request.onerror = (event) => {
+          console.warn("IndexedDB failed to open, using fallback:", event.target.error);
+          resolve(null);
+        };
+      } catch (err) {
+        console.warn("IndexedDB initialization error, using fallback:", err);
         resolve(null);
-      };
+      }
     });
   }
 
@@ -99,25 +104,33 @@ class StorageManager {
     };
 
     if (this.db) {
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
-        const store = tx.objectStore(STORE_MEETINGS);
-        const req = store.put(record);
-        req.onsuccess = () => resolve(record);
-        req.onerror = () => reject(req.error);
+      return new Promise((resolve) => {
+        try {
+          const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
+          const store = tx.objectStore(STORE_MEETINGS);
+          const req = store.put(record);
+          req.onsuccess = () => resolve(record);
+          req.onerror = () => resolve(this._saveFallback(record));
+          tx.onerror = () => resolve(this._saveFallback(record));
+        } catch (e) {
+          resolve(this._saveFallback(record));
+        }
       });
     } else {
-      // LocalStorage fallback
-      const history = this.getSetting('history_fallback', []);
-      const existingIdx = history.findIndex(m => m.id === record.id);
-      if (existingIdx >= 0) {
-        history[existingIdx] = record;
-      } else {
-        history.unshift(record);
-      }
-      this.setSetting('history_fallback', history.slice(0, 50));
-      return record;
+      return this._saveFallback(record);
     }
+  }
+
+  _saveFallback(record) {
+    const history = this.getSetting('history_fallback', []);
+    const existingIdx = history.findIndex(m => m.id === record.id);
+    if (existingIdx >= 0) {
+      history[existingIdx] = record;
+    } else {
+      history.unshift(record);
+    }
+    this.setSetting('history_fallback', history.slice(0, 50));
+    return record;
   }
 
   async getAllMeetings() {

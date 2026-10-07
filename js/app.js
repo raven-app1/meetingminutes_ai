@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyResult: document.getElementById('btnCopyResult'),
     btnDownloadWord: document.getElementById('btnDownloadWord'),
     btnDownloadMd: document.getElementById('btnDownloadMd'),
+    btnDownloadTxt: document.getElementById('btnDownloadTxt'),
     btnPrintPdf: document.getElementById('btnPrintPdf'),
     btnSaveHistory: document.getElementById('btnSaveHistory'),
     // Antigravity Tab
@@ -356,6 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
       DocumentExporter.downloadMarkdown(title, state.rawMarkdownResult);
     });
 
+    if (elements.btnDownloadTxt) {
+      elements.btnDownloadTxt.addEventListener('click', () => {
+        if (!state.rawMarkdownResult) return;
+        const title = elements.meetingTitleInput.value.trim() || 'Meeting_Minutes';
+        DocumentExporter.downloadPlainText(title, state.rawMarkdownResult);
+      });
+    }
+
     elements.btnPrintPdf.addEventListener('click', () => {
       if (!state.rawMarkdownResult) return;
       window.print();
@@ -390,6 +399,22 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.pasteModal.addEventListener('click', (e) => {
         if (e.target === elements.pasteModal) {
           closePasteModal();
+        }
+      });
+    }
+
+    // Modal keyboard accessibility
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && elements.pasteModal && !elements.pasteModal.classList.contains('hidden')) {
+        closePasteModal();
+      }
+    });
+
+    if (elements.modalPasteInput) {
+      elements.modalPasteInput.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          handleSubmitModalPaste();
         }
       });
     }
@@ -487,7 +512,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchMainTab(tabId) {
     state.currentTab = tabId;
     elements.navTabs.forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+      const isActive = btn.getAttribute('data-tab') === tabId;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
     elements.tabPanes.forEach(pane => {
       pane.classList.toggle('hidden', pane.id !== `tabContent-${tabId}`);
@@ -560,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clear Audio
     elements.clearAudioBtn.addEventListener('click', () => {
-      audioEngine.pause();
+      audioEngine.clearAudio();
       state.currentAudioBlob = null;
       state.currentAudioFile = null;
       state.currentAudioName = '';

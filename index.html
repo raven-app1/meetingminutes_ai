@@ -37,19 +37,19 @@
 
     <!-- Top Navigation Tabs -->
     <nav class="nav-tabs" role="tablist">
-      <button class="nav-tab-btn active" data-tab="studio" id="navStudioBtn">
+      <button class="nav-tab-btn active" role="tab" aria-selected="true" data-tab="studio" id="navStudioBtn">
         ✨ <span id="txt-tabStudio">မှတ်တမ်း ထုတ်ယူရန်</span>
       </button>
-      <button class="nav-tab-btn" data-tab="antigravity" id="navAntigravityBtn">
+      <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="antigravity" id="navAntigravityBtn">
         🚀 <span id="txt-tabAntigravity">Antigravity / Gemini အသုံးပြုနည်း</span>
       </button>
-      <button class="nav-tab-btn" data-tab="history" id="navHistoryBtn">
+      <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="history" id="navHistoryBtn">
         📂 <span id="txt-tabHistory">ယခင် မှတ်တမ်းဟောင်းများ</span>
       </button>
-      <button class="nav-tab-btn" data-tab="settings" id="navSettingsBtn">
+      <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="settings" id="navSettingsBtn">
         ⚙️ <span id="txt-tabSettings">ချိန်ညှိချက်များ</span>
       </button>
-      <button class="nav-tab-btn" data-tab="help" id="navHelpBtn">
+      <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="help" id="navHelpBtn">
         ❓ <span id="txt-tabHelp">လမ်းညွှန်</span>
       </button>
     </nav>
@@ -106,7 +106,7 @@
                     <span id="recordIcon">⏺</span> <span id="txt-recordStart">အသံဖမ်း စတင်မည်</span>
                   </button>
                 </div>
-                <p class="dropzone-subtext" id="recordHint">Microphone ဖွင့်ပြီး မြန်မာလို တိုက်ရိုက် အသံဖမ်းယူနိုင်ပါသည်</p>
+                <p class="dropzone-subtext" id="recordHint"><span id="txt-recordHint">Microphone ဖွင့်ပြီး မြန်မာလို တိုက်ရိုက် အသံဖမ်းယူနိုင်ပါသည်</span></p>
               </div>
             </div>
 
@@ -117,7 +117,7 @@
                 🎯 <span id="txt-loadSampleBtn">နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ</span>
               </button>
               <div class="form-group">
-                <label for="transcriptTextInput">သို့မဟုတ် စာသား/Transcript တိုက်ရိုက် ထည့်သွင်းရန်:</label>
+                <label for="transcriptTextInput" id="txt-transcriptInputLabel">သို့မဟုတ် စာသား/Transcript တိုက်ရိုက် ထည့်သွင်းရန်:</label>
                 <textarea id="transcriptTextInput" class="textarea-box" rows="4" placeholder="အသံဖိုင် မရှိပါက အစည်းအဝေး ဆွေးနွေးချက် စာသားများကို ဤနေရာတွင် ရိုက်ထည့်နိုင်ပါသည်..."></textarea>
               </div>
             </div>
@@ -265,6 +265,11 @@
                 <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;" id="txt-bridgeStatusDesc">
                   Antigravity subscription ဖြင့် API Key မလိုဘဲ မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်။
                 </div>
+                <div style="margin-top:0.4rem;">
+                  <a href="javascript:void(0)" id="jumpToAntigravityLink" style="color:#38bdf8; font-size:0.8rem; text-decoration:none;">
+                    <span id="txt-jumpToAgLink">အသေးစိတ် လမ်းညွှန်ကြည့်ရန် ↗</span>
+                  </a>
+                </div>
               </div>
 
               <!-- Primary Generate Button for Antigravity -->
@@ -352,6 +357,9 @@
                 <button id="btnDownloadMd" class="btn btn-secondary btn-sm" title="Download Markdown (.md)">
                   📑 <span id="txt-downloadMd">Markdown (.md)</span>
                 </button>
+                <button id="btnDownloadTxt" class="btn btn-secondary btn-sm" title="Download Plain Text (.txt)">
+                  📝 <span id="txt-downloadTxt">Text (.txt)</span>
+                </button>
                 <button id="btnPrintPdf" class="btn btn-secondary btn-sm" title="Print or Save as PDF">
                   🖨️ <span id="txt-printPdf">PDF / ပုံနှိပ်မည်</span>
                 </button>
@@ -367,8 +375,8 @@
               <div id="resultFormattedView" class="minutes-rendered">
                 <div style="text-align:center; padding:5rem 2rem; color:var(--text-muted);">
                   <div style="font-size:3rem; margin-bottom:1rem;">🎙️ ✨ 📋</div>
-                  <h3 style="font-size:1.2rem; color:#f1f5f9; margin-bottom:0.5rem;">အစည်းအဝေး မှတ်တမ်း မထုတ်ယူရသေးပါ</h3>
-                  <p style="font-size:0.9rem; max-width:480px; margin:0 auto;">
+                  <h3 style="font-size:1.2rem; color:#f1f5f9; margin-bottom:0.5rem;" id="txt-emptyStateTitle">အစည်းအဝေး မှတ်တမ်း မထုတ်ယူရသေးပါ</h3>
+                  <p style="font-size:0.9rem; max-width:480px; margin:0 auto;" id="txt-emptyStateDesc">
                     ဘယ်ဘက်တွင် မြန်မာအသံဖိုင် ရွေးချယ်ပြီး လိုချင်သော ပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ် သို့မဟုတ် တာဝန်များ) ကို ရွေးချယ်ကာ "မှတ်တမ်း ထုတ်ယူမည်" ကို နှိပ်ပါ သို့မဟုတ် "နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ" ဖြင့် စမ်းသပ်ကြည့်နိုင်ပါသည်။
                   </p>
                   <div style="margin-top:1.5rem;">
@@ -477,7 +485,7 @@
           <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
             <span id="txt-agBridgeStatusLabel" style="font-size:0.88rem; color:var(--text-muted);">Bridge ချိတ်ဆက်မှု အခြေအနေ:</span>
             <span id="bridgeStatusBadge" class="badge-tag">စစ်ဆေးနေပါသည်...</span>
-            <button id="btnCheckBridge" class="btn btn-outline btn-sm">ပြန်လည်စစ်ဆေးမည် 🔄</button>
+            <button id="btnCheckBridge" class="btn btn-outline btn-sm"><span id="txt-btnCheckBridge">ပြန်လည်စစ်ဆေးမည် 🔄</span></button>
             <button id="btnRunBridgeNow" class="btn btn-accent btn-sm">
               ⚡ <span id="txt-runBridgeNowBtn">Current Meeting ကို Bridge ဖြင့် စမ်းသပ် run မည်</span>
             </button>
@@ -536,7 +544,7 @@
 
         <div style="border-top:1px solid var(--border-color); padding-top:1.5rem; margin-top:1.5rem;">
           <button id="btnSaveSettings" class="btn btn-primary">
-            💾 သိမ်းဆည်းမည် (Save Settings)
+            💾 <span id="txt-btnSaveSettings">သိမ်းဆည်းမည် (Save Settings)</span>
           </button>
         </div>
       </div>
