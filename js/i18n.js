@@ -1,0 +1,295 @@
+/**
+ * Internationalization (i18n) dictionary for Burmese Meeting Minutes AI
+ * Supports full bilingual toggling: မြန်မာစာ (Burmese Unicode) and English.
+ */
+
+const translations = {
+  my: {
+    // App Header
+    appTitle: "အစည်းအဝေး မှတ်တမ်း AI",
+    appSubtitle: "မြန်မာဘာသာ အသံဖိုင်များမှ အစည်းအဝေးမှတ်တမ်းကို Gemini AI ဖြင့် အလိုအလျောက် ရေးသားထုတ်ယူပေးသည့် စနစ်",
+    backendlessBadge: "Backend မလို (Browser သီးသန့်)",
+    langToggle: "English",
+    
+    // Navigation / Tabs
+    tabStudio: "မှတ်တမ်း ထုတ်ယူရန်",
+    tabAntigravity: "Antigravity / Gemini အသုံးပြုနည်း",
+    tabHistory: "ယခင် မှတ်တမ်းဟောင်းများ",
+    tabSettings: "ချိန်ညှိချက်များ",
+    tabHelp: "လမ်းညွှန်",
+
+    // Step 1: Audio Input
+    step1Title: "အဆင့် ၁ - အစည်းအဝေး အသံဖိုင် ထည့်သွင်းခြင်း",
+    audioUploadTab: "အသံဖိုင် တင်ရန်",
+    audioRecordTab: "အသံ တိုက်ရိုက်ဖမ်းရန်",
+    audioTextTab: "စာသား ရိုက်ထည့်ရန် / နမူနာ",
+    dragDropText: "အသံဖိုင်ကို ဤနေရာသို့ ဆွဲထည့်ပါ သို့မဟုတ် ရွေးချယ်ပါ",
+    supportedFormats: "MP3, M4A, WAV, AAC, OGG, WEBM, FLAC (အများဆုံး 25MB တိုက်ရိုက် သို့မဟုတ် Antigravity ဖြင့် အကန့်အသတ်မရှိ)",
+    browseFiles: "ဖိုင်ရွေးချယ်ပါ",
+    recordStart: "အသံဖမ်း စတင်မည်",
+    recordPause: "ခေတ္တရပ်မည်",
+    recordResume: "ဆက်လက်ဖမ်းမည်",
+    recordStop: "အသံဖမ်း ရပ်တန့်မည်",
+    recordingTime: "အသံဖမ်းချိန်:",
+    orUseSample: "သို့မဟုတ် စမ်းသပ်ရန် မြန်မာအစည်းအဝေး နမူနာဖိုင် သုံးမည်",
+    loadSampleBtn: "နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ",
+    clearAudioBtn: "ဖိုင် ပြန်ဖျက်မည်",
+    audioLoaded: "အသံဖိုင် ထည့်သွင်းပြီးပါပြီ:",
+    audioDuration: "ကြာချိန်:",
+    audioSize: "ဖိုင်အရွယ်အစား:",
+
+    // Step 2: Settings & Modes
+    step2Title: "အဆင့် ၂ - AI စနစ်နှင့် မှတ်တမ်းပုံစံ ရွေးချယ်ခြင်း",
+    meetingTitleLabel: "အစည်းအဝေး ခေါင်းစဉ် (ရွေးချယ်နိုင်သည်):",
+    meetingTitlePlaceholder: "ဥပမာ - အပတ်စဉ် စီမံခန့်ခွဲမှုနှင့် ဘတ်ဂျက် အစည်းအဝေး",
+    aiModeLabel: "မှတ်တမ်း ပုံစံ ရွေးချယ်ပါ:",
+    outputLangLabel: "ထွက်ရှိမည့် ဘာသာစကား:",
+    langPureMy: "မြန်မာဘာသာ သီးသန့် (Pure Burmese)",
+    langBilingual: "မြန်မာ + English (နည်းပညာ/လုပ်ငန်းသုံး)",
+    langEnglish: "English ဘာသာပြန် (English Translation)",
+
+    // AI Modes
+    modeSummary: "အကျဉ်းချုပ် အစီရင်ခံစာ (Executive Summary)",
+    modeSummaryDesc: "အဓိက သဘောတူညီချက်များ၊ ဆုံးဖြတ်ချက်များနှင့် အနှစ်ချုပ်ကို အကျဉ်းရုံးဖော်ပြခြင်း",
+    modeDetailed: "အသေးစိတ် မှတ်တမ်း (Detailed Minutes)",
+    modeDetailedDesc: "အစီအစဉ်အလိုက် ဆွေးနွေးချက်များ၊ တင်ပြသူများနှင့် ဆွေးနွေးမှုအသေးစိတ်ကို အပြည့်အစုံ ရေးသားခြင်း",
+    modeActionItems: "လုပ်ဆောင်ရန်များနှင့် ဆုံးဖြတ်ချက်များ (Action Items & Decisions)",
+    modeActionItemsDesc: "တာဝန်ခွဲဝေမှု၊ တာဝန်ခံ (Assignee)၊ ပြီးစီးရမည့်ရက် (Deadline) နှင့် ဆုံးဖြတ်ချက်များ ဇယား",
+    modeDiscussion: "ဆွေးနွေးချက်များနှင့် အမေးအဖြေ (Discussion & Q&A)",
+    modeDiscussionDesc: "အစည်းအဝေးတွင် မေးမြန်းခဲ့သော မေးခွန်းများ၊ ဖြေဆိုချက်များနှင့် မပြေလည်သေးသော အချက်များ",
+    modeFormal: "တရားဝင် ရုံးသုံး မှတ်တမ်း (Formal Corporate Minutes)",
+    modeFormalDesc: "အဖွဲ့အစည်း၊ နေ့စွဲ၊ တက်ရောက်သူ၊ ဥက္ကဋ္ဌ၊ အတွင်းရေးမှူး နှင့် လက်မှတ်ရေးထိုးရန် နေရာပါဝင်သော စံပုံစံ",
+    modeTranscript: "သန့်စင်ပြီး စာသား အပြည့်အစုံ (Cleaned Transcript)",
+    modeTranscriptDesc: "အသံဖိုင်မှ ပြောဆိုခဲ့သည်များကို စကားလုံးအလိုက် သန့်စင်ပြီး အချိန်မှတ်တမ်းနှင့်အတူ ရေးသားခြင်း",
+    
+    customPromptToggle: "စိတ်ကြိုက် ညွှန်ကြားချက် ပေါင်းထည့်မည် (+)",
+    customPromptLabel: "စိတ်ကြိုက် ညွှန်ကြားချက် (Custom Instructions):",
+    customPromptPlaceholder: "ဥပမာ - ဘဏ္ဍာရေးနှင့် ဘတ်ဂျက်ဆွေးနွေးချက်ကို အထူးပြု မှတ်တမ်းတင်ပေးပါ သို့မဟုတ် Vendor ဈေးနှုန်းများကို အလေးထားပါ...",
+
+    // Step 3: Execution / Generation
+    step3Title: "အဆင့် ၃ - မှတ်တမ်း ထုတ်ယူခြင်း",
+    methodGeminiApi: "Google AI Studio API Key (တိုက်ရိုက် အခမဲ့)",
+    methodAntigravity: "Antigravity Subscription / Gemini Web (API Key မလို)",
+    methodCliBridge: "Local Antigravity CLI Bridge (စက်တွင်း)",
+    apiKeyLabel: "Google AI Studio Free API Key:",
+    apiKeyPlaceholder: "AIzaSy... (သင့် Browser တွင်သာ သိမ်းဆည်းမည်)",
+    apiKeyHelp: "AI Key မရှိသေးပါက Google AI Studio တွင် အခမဲ့ ရယူနိုင်ပါသည် (သို့မဟုတ် Antigravity Tab ကို အသုံးပြုပါ)",
+    getKeyBtn: "Free Key ရယူရန် ↗",
+    rememberKey: "API Key ကို Browser တွင် အမြဲမှတ်ထားမည်",
+    modelSelectLabel: "Gemini Model:",
+    generateBtn: "အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦",
+    generatingText: "Gemini AI မှ အသံဖိုင်ကို နားထောင်ပြီး မှတ်တမ်းရေးနေပါသည်...",
+    cancelBtn: "ပယ်ဖျက်မည်",
+    bridgeActive: "Local Antigravity Bridge ချိတ်ဆက်မိနေပါသည်",
+    bridgeInactive: "Local Bridge မရှိပါ (API Key သို့မဟုတ် Gemini Web ကို သုံးပါ)",
+
+    // Result Viewer & Editor
+    resultTitle: "ထွက်ရှိလာသော အစည်းအဝေး မှတ်တမ်း",
+    viewFormatted: "လှပသော ပုံစံဖြင့် ကြည့်မည်",
+    viewRaw: "စာသား တည်းဖြတ်မည် (Edit)",
+    viewActions: "လုပ်ဆောင်ရန် တာဝန်များ (Tasks)",
+    copyBtn: "Copy ကူးမည်",
+    copiedSuccess: "ကူးယူပြီးပါပြီ!",
+    downloadWord: "Word (.doc) သိမ်းမည်",
+    downloadMd: "Markdown (.md) သိမ်းမည်",
+    downloadTxt: "Text (.txt) သိမ်းမည်",
+    printPdf: "PDF / ပုံနှိပ်မည်",
+    saveToHistory: "မှတ်တမ်းဟောင်းတွင် သိမ်းမည်",
+    savedSuccess: "မှတ်တမ်း သိမ်းဆည်းပြီးပါပြီ!",
+    regenerateBtn: "ပြန်လည်ထုတ်ယူမည်",
+    wordCount: "စကားလုံး အရေအတွက်:",
+    actionItemCounter: "လုပ်ဆောင်ရန် တာဝန်:",
+
+    // Antigravity Subscription Tab
+    agTitle: "Antigravity Subscription သို့မဟုတ် Gemini Web အသုံးပြုနည်း (API Key မလိုပါ)",
+    agIntro: "သင့်တွင် Antigravity subscription သို့မဟုတ် Gemini Advanced စာရင်းသွင်းမှု ရှိပြီး Gemini API Key မသုံးလိုပါက အောက်ပါ လွယ်ကူသော နည်းလမ်း ၂ မျိုးဖြင့် အသုံးပြုနိုင်ပါသည်:",
+    agOption1Title: "နည်းလမ်း ၁ - Gemini Web စနစ် (အလွယ်ကူဆုံး - Browser တွင် ချက်ချင်းသုံးနိုင်သည်)",
+    agOpt1Step1: "၁။ ဤ Web App တွင် အစည်းအဝေး ခေါင်းစဉ်နှင့် လိုချင်သော မှတ်တမ်းပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ်၊ တာဝန်များ စသည်) ကို ရွေးချယ်ပါ။",
+    agOpt1Step2: "၂။ အောက်ပါ 'မြန်မာ အစည်းအဝေး Prompt ကူးယူမည်' ခလုတ်ကို နှိပ်ပါ။",
+    agOpt1Step3: "၃။ Gemini Web (gemini.google.com) ကို ဖွင့်ပြီး သင့် အသံဖိုင်ကို ဆွဲထည့် (Upload) လိုက်ပါ။",
+    agOpt1Step4: "၄။ ကူးယူထားသော Prompt ကို Paste လုပ်ပြီး Enter နှိပ်ပါ။ (Gemini Advanced / Antigravity က မြန်မာအသံဖိုင်ကို တိုက်ရိုက် နားထောင်ပေးပါသည်)",
+    agOpt1Step5: "၅။ Gemini မှ ထွက်လာသော စာသားကို ဤနေရာတွင် ပြန်လည် Paste လုပ်ပေးလိုက်ပါက သပ်ရပ်လှပသော စာရွက်စာတမ်းပုံစံ၊ Word ဖိုင်နှင့် PDF အဖြစ် ချက်ချင်း ပြောင်းလဲပေးမည် ဖြစ်ပါသည်။",
+    copyOptimizedPromptBtn: "မြန်မာ အစည်းအဝေး Prompt ကူးယူမည် 📋",
+    openGeminiWebBtn: "Gemini Web ဖွင့်မည် ↗",
+    pasteBackTitle: "Gemini မှ ထွက်လာသော အဖြေကို ဤနေရာတွင် ထည့်ပါ:",
+    pasteBackPlaceholder: "Gemini မှ ရရှိလာသော အစည်းအဝေး မှတ်တမ်း စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ...",
+    formatPastedBtn: "မှတ်တမ်း ပုံစံအဖြစ် ပြောင်းလဲပြီး သိမ်းဆည်းမည် ✨",
+
+    agOption2Title: "နည်းလမ်း ၂ - Local Antigravity CLI Bridge (စက်တွင်း အလိုအလျောက်ချိတ်ဆက်မှု)",
+    agOpt2Desc: "သင့်ကွန်ပျူတာတွင် `agy` CLI ထည့်သွင်းထားပြီး Antigravity subscription ရှိပါက နောက်ခံ Bridge runner ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူပြီး မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်:",
+    agRunBridgeCommand: "Terminal တွင် ဤ command ကို run ပါ -",
+    agBridgeStatusLabel: "Bridge ချိတ်ဆက်မှု အခြေအနေ:",
+
+    // History Tab
+    historyTitle: "သိမ်းဆည်းထားသော အစည်းအဝေး မှတ်တမ်းများ",
+    historyEmpty: "ယခုအချိန်အထိ သိမ်းဆည်းထားသော အစည်းအဝေးမှတ်တမ်း မရှိသေးပါ။",
+    historySearchPlaceholder: "ခေါင်းစဉ် သို့မဟုတ် အကြောင်းအရာ ရှာဖွေပါ...",
+    historyDeleteAll: "အားလုံး ဖျက်မည်",
+    historyConfirmDeleteAll: "မှတ်တမ်းအားလုံးကို ဖျက်ရန် သေချာပါသလား?",
+    historyConfirmDelete: "ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?",
+    loadRecord: "ပြန်လည် ကြည့်ရှုမည်",
+    deleteRecord: "ဖျက်မည်",
+
+    // Help & FAQ
+    helpTitle: "အသုံးပြုပုံ လမ်းညွှန်နှင့် မကြာခဏ မေးလေ့ရှိသော မေးခွန်းများ",
+    helpQ1: "၁။ Backend ဆာဗာ မရှိဘဲ ဘယ်လို အလုပ်လုပ်တာလဲ?",
+    helpA1: "ဤ Web App သည် သင့် Browser အတွင်း၌သာ ၁၀၀% အလုပ်လုပ်ပါသည်။ သင့်အသံဖိုင်များနှင့် မှတ်တမ်းများသည် သင့်ကွန်ပျူတာမှ အခြားဆာဗာများသို့ မရောက်ရှိဘဲ လုံခြုံစိတ်ချရပါသည်။ Google AI Studio ကို သုံးလျှင်လည်း Browser မှ Google API သို့ တိုက်ရိုက် လုံခြုံစွာ ဆက်သွယ်ပါသည်။",
+    helpQ2: "၂။ မြန်မာစကား အသံဖိုင်များကို AI က ကောင်းစွာ နားလည်ပါသလား?",
+    helpA2: "Gemini 2.5 Flash / 1.5 Flash သည် မြန်မာဘာသာ အသံဖိုင်များကို တိုက်ရိုက် နားထောင်နိုင်စွမ်း ရှိပါသည်။ အစည်းအဝေးများတွင် သုံးလေ့ရှိသော မြန်မာ+English ရောနှောစကားများ (Code-switching) နှင့် ရုံးသုံး ဝေါဟာရများကို သဘာဝကျကျ အစည်းအဝေးမှတ်တမ်းအဖြစ် ပြောင်းလဲပေးနိုင်ရန် စနစ်တကျ Prompt များ ချိန်ညှိထားပါသည်။",
+    helpQ3: "၃။ အသံဖိုင် အရွယ်အစား ကြီးမားနေပါက ဘာလုပ်ရမလဲ?",
+    helpA3: "မိနစ် ၆၀ အထက် အသံဖိုင်ကြီးများအတွက် နည်းလမ်း ၁ (Gemini Web သို့ တိုက်ရိုက် တင်ခြင်း) ကို အကြံပြုပါသည်။ Gemini Web သည် ဖိုင်ကြီးများကို အခမဲ့ အကန့်အသတ်မရှိ လက်ခံပြီး ဤ App မှ ထုတ်ပေးသော Prompt နှင့် ပေါင်းစပ်ပါက အကောင်းဆုံး ရလဒ် ရရှိပါမည်။",
+
+    // Alerts and Notifications
+    alertNoAudio: "ကျေးဇူးပြု၍ အသံဖိုင်တစ်ခု ရွေးချယ်ပါ သို့မဟုတ် စာသား ထည့်သွင်းပါ။",
+    alertNoApiKey: "Google AI Studio API Key ထည့်သွင်းပေးပါ (သို့မဟုတ် Antigravity/Gemini Web အသုံးပြုနည်းကို ရွေးပါ)။",
+    alertSuccessGenerated: "အစည်းအဝေး မှတ်တမ်း အောင်မြင်စွာ ထုတ်ယူပြီးပါပြီ!",
+    alertError: "အမှားအယွင်း ဖြစ်ပေါ်ခဲ့ပါသည်: "
+  },
+
+  en: {
+    // App Header
+    appTitle: "Burmese Meeting Minutes AI",
+    appSubtitle: "Automated Meeting Minutes extraction from Burmese audio recordings powered by Gemini AI",
+    backendlessBadge: "Backendless (Pure Browser)",
+    langToggle: "မြန်မာစာ",
+
+    // Navigation / Tabs
+    tabStudio: "Minutes Studio",
+    tabAntigravity: "Antigravity / Gemini Guide",
+    tabHistory: "Meeting History",
+    tabSettings: "Settings",
+    tabHelp: "Help & FAQ",
+
+    // Step 1: Audio Input
+    step1Title: "Step 1: Meeting Audio Input",
+    audioUploadTab: "Upload Audio File",
+    audioRecordTab: "Record Live Audio",
+    audioTextTab: "Transcript / Sample",
+    dragDropText: "Drag & drop your meeting audio here or click to browse",
+    supportedFormats: "MP3, M4A, WAV, AAC, OGG, WEBM, FLAC (Direct up to 25MB, or unlimited via Antigravity workflow)",
+    browseFiles: "Browse Audio File",
+    recordStart: "Start Recording",
+    recordPause: "Pause",
+    recordResume: "Resume",
+    recordStop: "Stop Recording",
+    recordingTime: "Recording Time:",
+    orUseSample: "Or try with a sample Burmese meeting recording:",
+    loadSampleBtn: "Load Sample Meeting Audio",
+    clearAudioBtn: "Clear Audio",
+    audioLoaded: "Audio loaded:",
+    audioDuration: "Duration:",
+    audioSize: "Size:",
+
+    // Step 2: Settings & Modes
+    step2Title: "Step 2: AI Modes & Meeting Settings",
+    meetingTitleLabel: "Meeting Title (Optional):",
+    meetingTitlePlaceholder: "e.g. Weekly Management & Budget Review Meeting",
+    aiModeLabel: "Select Minutes Format:",
+    outputLangLabel: "Output Language:",
+    langPureMy: "Pure Burmese (မြန်မာဘာသာ သီးသန့်)",
+    langBilingual: "Bilingual (Burmese + English Business Terms)",
+    langEnglish: "English Translation (Formal English)",
+
+    // AI Modes
+    modeSummary: "Executive Summary (အကျဉ်းချုပ်)",
+    modeSummaryDesc: "High-level brief, key takeaways, crucial decisions, and executive wrap-up",
+    modeDetailed: "Detailed Minutes (အသေးစိတ် မှတ်တမ်း)",
+    modeDetailedDesc: "Comprehensive chronological breakdown by agenda, speakers, and discussions",
+    modeActionItems: "Action Items & Decisions (လုပ်ဆောင်ရန်နှင့် ဆုံးဖြတ်ချက်များ)",
+    modeActionItemsDesc: "Actionable tasks table with assignees, deadlines, priorities, and formal resolutions",
+    modeDiscussion: "Discussion & Q&A Breakdown (ဆွေးနွေးချက်နှင့် အမေးအဖြေ)",
+    modeDiscussionDesc: "Key questions asked, answers given, debates, and unresolved open topics",
+    modeFormal: "Formal Corporate Minutes (တရားဝင် ရုံးသုံး ပုံစံ)",
+    modeFormalDesc: "Standard corporate template with organization header, attendees, agenda, resolutions, and sign-offs",
+    modeTranscript: "Cleaned Full Transcript (သန့်စင်ပြီး စာသား အပြည့်အစုံ)",
+    modeTranscriptDesc: "Full cleaned speech-to-text transcript with speaker tags and timeline markers",
+    
+    customPromptToggle: "Add Custom Instructions (+)",
+    customPromptLabel: "Custom Instructions / Focus Area:",
+    customPromptPlaceholder: "e.g. Focus especially on the budget negotiations or extract vendor comparison details...",
+
+    // Step 3: Execution / Generation
+    step3Title: "Step 3: Generate Meeting Minutes",
+    methodGeminiApi: "Google AI Studio API Key (Direct Free Key)",
+    methodAntigravity: "Antigravity Subscription / Gemini Web (Zero Key Needed)",
+    methodCliBridge: "Local Antigravity CLI Bridge (Local Machine)",
+    apiKeyLabel: "Google AI Studio Free API Key:",
+    apiKeyPlaceholder: "AIzaSy... (Stored solely in your browser)",
+    apiKeyHelp: "Don't have a key? Get one free in 30 seconds from Google AI Studio (or use the Antigravity tab)",
+    getKeyBtn: "Get Free Key ↗",
+    rememberKey: "Remember API Key in this browser",
+    modelSelectLabel: "Gemini Model:",
+    generateBtn: "Generate Meeting Minutes ✦",
+    generatingText: "Gemini AI is analyzing the Burmese audio and crafting your minutes...",
+    cancelBtn: "Cancel",
+    bridgeActive: "Local Antigravity CLI Bridge is connected",
+    bridgeInactive: "Local Bridge offline (Use Free API Key or Gemini Web mode)",
+
+    // Result Viewer & Editor
+    resultTitle: "Generated Meeting Minutes",
+    viewFormatted: "Formatted View",
+    viewRaw: "Markdown / Edit",
+    viewActions: "Action Items Tasks",
+    copyBtn: "Copy Text",
+    copiedSuccess: "Copied to clipboard!",
+    downloadWord: "Export Word (.doc)",
+    downloadMd: "Export Markdown (.md)",
+    downloadTxt: "Export Text (.txt)",
+    printPdf: "Print / PDF",
+    saveToHistory: "Save to History",
+    savedSuccess: "Saved to history successfully!",
+    regenerateBtn: "Regenerate",
+    wordCount: "Word Count:",
+    actionItemCounter: "Action Items:",
+
+    // Antigravity Subscription Tab
+    agTitle: "How to Use with Antigravity Subscription or Gemini Web (No API Key Required)",
+    agIntro: "If you have an Antigravity subscription or Gemini Advanced and prefer not to use an API key, you can effortlessly use either of these two workflows:",
+    agOption1Title: "Workflow 1: Gemini Web Workflow (Zero Key, Browser-Only, Handles Large Audio Files)",
+    agOpt1Step1: "1. Select your Meeting Title, Output Language, and AI Mode (Summary, Detailed, Action Items, etc.) on this app.",
+    agOpt1Step2: "2. Click the 'Copy Optimized Burmese Prompt' button below.",
+    agOpt1Step3: "3. Open Gemini Web (gemini.google.com) where your subscription is active, and drag-and-drop your audio file directly into the chat.",
+    agOpt1Step4: "4. Paste the copied prompt and press Enter. Gemini Advanced will natively listen to the Burmese audio and generate the minutes.",
+    agOpt1Step5: "5. Copy Gemini's output and paste it into the box below. This app will instantly format it, render the interactive task checklist, and let you export to Word (.docx) or PDF!",
+    copyOptimizedPromptBtn: "Copy Optimized Burmese Prompt 📋",
+    openGeminiWebBtn: "Open Gemini Web ↗",
+    pasteBackTitle: "Paste Generated Result Here to Format & Export:",
+    pasteBackPlaceholder: "Paste the meeting minutes generated by Gemini or Antigravity here...",
+    formatPastedBtn: "Format Minutes & Save ✨",
+
+    agOption2Title: "Workflow 2: Local Antigravity CLI Bridge (`agy`)",
+    agOpt2Desc: "If you have the Antigravity CLI (`agy`) installed and authenticated on this machine, you can run our lightweight local bridge to process audio automatically without any manual copying:",
+    agRunBridgeCommand: "Run this command in terminal:",
+    agBridgeStatusLabel: "CLI Bridge Status:",
+
+    // History Tab
+    historyTitle: "Saved Meeting Minutes History",
+    historyEmpty: "No saved meeting minutes found yet.",
+    historySearchPlaceholder: "Search meetings by title or keyword...",
+    historyDeleteAll: "Clear All History",
+    historyConfirmDeleteAll: "Are you sure you want to delete all saved meeting records?",
+    historyConfirmDelete: "Are you sure you want to delete this meeting record?",
+    loadRecord: "Load Record",
+    deleteRecord: "Delete",
+
+    // Help & FAQ
+    helpTitle: "Frequently Asked Questions & Guides",
+    helpQ1: "1. How does this work without a backend server?",
+    helpA1: "This web application is 100% client-side. It runs entirely inside your modern browser. Audio processing, prompts, and document exports are performed on your device. Your data stays private and is never transmitted to any third-party middleman server.",
+    helpQ2: "2. Can Gemini AI understand spoken Burmese audio?",
+    helpA2: "Yes! Google Gemini 2.5 Flash and 1.5 Flash natively support multimodal audio comprehension for Burmese (Myanmar). It accurately identifies speakers, context, and commonly mixed English business terms (Code-switching) to draft structured minutes.",
+    helpQ3: "3. What if my audio file is very long (over 1 hour)?",
+    helpA3: "For very long meetings (1-3+ hours), Workflow 1 (Gemini Web with Antigravity Subscription) is the best choice. Gemini Web supports large audio uploads for subscription holders, and our app generates the exact prompt to parse long recordings accurately.",
+
+    // Alerts and Notifications
+    alertNoAudio: "Please provide an audio file or enter text first.",
+    alertNoApiKey: "Please enter your Google AI Studio API Key (or use the Antigravity / Gemini Web mode).",
+    alertSuccessGenerated: "Meeting minutes generated successfully!",
+    alertError: "An error occurred: "
+  }
+};
+
+// Export for both Browser and Node.js test environment
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { translations };
+}

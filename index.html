@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>အစည်းအဝေး မှတ်တမ်း AI - Burmese Meeting Minutes AI</title>
+  
+  <!-- Myanmar Unicode Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-logo">🎙️</div>
+        <div class="brand-title-wrap">
+          <h1>
+            <span id="txt-appTitle">အစည်းအဝေး မှတ်တမ်း AI</span>
+            <span class="badge-tag" id="txt-backendlessBadge">Backend မလို (Browser သီးသန့်)</span>
+          </h1>
+          <p id="txt-appSubtitle">မြန်မာဘာသာ အသံဖိုင်များမှ အစည်းအဝေးမှတ်တမ်းကို Gemini AI ဖြင့် အလိုအလျောက် ရေးသားထုတ်ယူပေးသည့် စနစ်</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="langToggleBtn" class="btn btn-outline btn-sm">
+          🌐 <span id="txt-langToggle">English</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Top Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab-btn active" data-tab="studio" id="navStudioBtn">
+        ✨ <span id="txt-tabStudio">မှတ်တမ်း ထုတ်ယူရန်</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="antigravity" id="navAntigravityBtn">
+        🚀 <span id="txt-tabAntigravity">Antigravity / Gemini အသုံးပြုနည်း</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="history" id="navHistoryBtn">
+        📂 <span id="txt-tabHistory">ယခင် မှတ်တမ်းဟောင်းများ</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="settings" id="navSettingsBtn">
+        ⚙️ <span id="txt-tabSettings">ချိန်ညှိချက်များ</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="help" id="navHelpBtn">
+        ❓ <span id="txt-tabHelp">လမ်းညွှန်</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: STUDIO (Main Workspace) -->
+    <main id="tabContent-studio" class="tab-pane active">
+      <div class="main-grid">
+        
+        <!-- Left Column: Audio Input & AI Options -->
+        <aside class="sidebar-col">
+          
+          <!-- Card 1: Audio Input -->
+          <div class="card">
+            <div class="card-header">
+              <h2><span id="txt-step1Title">အဆင့် ၁ - အစည်းအဝေး အသံဖိုင် ထည့်သွင်းခြင်း</span></h2>
+              <button id="clearAudioBtn" class="btn btn-outline btn-sm hidden">
+                ✕ <span id="txt-clearAudioBtn">ဖိုင် ပြန်ဖျက်မည်</span>
+              </button>
+            </div>
+
+            <!-- Sub Tabs: File / Mic / Sample -->
+            <div class="sub-tabs">
+              <button class="sub-tab-btn active" data-subtab="upload" id="subtabUploadBtn">
+                📁 <span id="txt-audioUploadTab">အသံဖိုင် တင်ရန်</span>
+              </button>
+              <button class="sub-tab-btn" data-subtab="record" id="subtabRecordBtn">
+                🎙️ <span id="txt-audioRecordTab">အသံ တိုက်ရိုက်ဖမ်းရန်</span>
+              </button>
+              <button class="sub-tab-btn" data-subtab="sample" id="subtabSampleBtn">
+                📝 <span id="txt-audioTextTab">နမူနာ စမ်းသပ်ရန်</span>
+              </button>
+            </div>
+
+            <!-- Subtab 1: Upload File -->
+            <div id="subtabContent-upload" class="subtab-pane active">
+              <div class="dropzone" id="dropzone">
+                <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.webm,.flac" style="display:none;">
+                <div class="dropzone-icon">📥</div>
+                <div class="dropzone-text" id="txt-dragDropText">အသံဖိုင်ကို ဤနေရာသို့ ဆွဲထည့်ပါ သို့မဟုတ် ရွေးချယ်ပါ</div>
+                <div class="dropzone-subtext" id="txt-supportedFormats">MP3, M4A, WAV, AAC, OGG, WEBM, FLAC (အများဆုံး 25MB တိုက်ရိုက် သို့မဟုတ် Antigravity ဖြင့် အကန့်အသတ်မရှိ)</div>
+                <button type="button" class="btn btn-secondary btn-sm" id="browseFileBtn">
+                  📂 <span id="txt-browseFiles">ဖိုင်ရွေးချယ်ပါ</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Subtab 2: Record Live -->
+            <div id="subtabContent-record" class="subtab-pane hidden">
+              <div class="recording-panel">
+                <canvas id="recordVisualizerCanvas" class="waveform-canvas" width="400" height="60"></canvas>
+                <div class="record-timer" id="recordTimer">00:00</div>
+                <div class="record-btn-wrap">
+                  <button id="recordToggleBtn" class="record-btn">
+                    <span id="recordIcon">⏺</span> <span id="txt-recordStart">အသံဖမ်း စတင်မည်</span>
+                  </button>
+                </div>
+                <p class="dropzone-subtext" id="recordHint">Microphone ဖွင့်ပြီး မြန်မာလို တိုက်ရိုက် အသံဖမ်းယူနိုင်ပါသည်</p>
+              </div>
+            </div>
+
+            <!-- Subtab 3: Sample & Text -->
+            <div id="subtabContent-sample" class="subtab-pane hidden">
+              <p class="dropzone-subtext" id="txt-orUseSample" style="margin-bottom:0.75rem;">သို့မဟုတ် စမ်းသပ်ရန် မြန်မာအစည်းအဝေး နမူနာဖိုင် သုံးမည်</p>
+              <button id="loadSampleBtn" class="btn btn-accent btn-block" style="margin-bottom:1rem;">
+                🎯 <span id="txt-loadSampleBtn">နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ</span>
+              </button>
+              <div class="form-group">
+                <label for="transcriptTextInput">သို့မဟုတ် စာသား/Transcript တိုက်ရိုက် ထည့်သွင်းရန်:</label>
+                <textarea id="transcriptTextInput" class="textarea-box" rows="4" placeholder="အသံဖိုင် မရှိပါက အစည်းအဝေး ဆွေးနွေးချက် စာသားများကို ဤနေရာတွင် ရိုက်ထည့်နိုင်ပါသည်..."></textarea>
+              </div>
+            </div>
+
+            <!-- Audio Player View (Shown when audio loaded) -->
+            <div id="audioPlayerBox" class="audio-player-box hidden">
+              <div class="audio-file-meta">
+                <span id="audioFileNameDisplay" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">audio.mp3</span>
+                <span id="audioSizeDisplay" style="color:var(--text-muted);">0 MB</span>
+              </div>
+              <canvas id="audioWaveCanvas" class="waveform-canvas" width="400" height="60"></canvas>
+              <div class="audio-controls">
+                <button id="playPauseBtn" class="player-btn play-btn" title="Play / Pause">▶</button>
+                <div class="progress-container">
+                  <input type="range" id="audioSeekSlider" class="audio-slider" min="0" max="100" value="0">
+                </div>
+                <span id="audioTimeDisplay" class="time-display">00:00 / 00:00</span>
+                <select id="playbackRateSelect" class="speed-select" title="Playback Speed">
+                  <option value="0.75">0.75x</option>
+                  <option value="1.0" selected>1.0x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0">2.0x</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Card 2: AI Modes & Settings -->
+          <div class="card">
+            <div class="card-header">
+              <h2><span id="txt-step2Title">အဆင့် ၂ - AI စနစ်နှင့် မှတ်တမ်းပုံစံ ရွေးချယ်ခြင်း</span></h2>
+            </div>
+
+            <!-- Meeting Title -->
+            <div class="form-group">
+              <label for="meetingTitleInput" id="txt-meetingTitleLabel">အစည်းအဝေး ခေါင်းစဉ် (ရွေးချယ်နိုင်သည်):</label>
+              <input type="text" id="meetingTitleInput" class="input-text" placeholder="ဥပမာ - အပတ်စဉ် စီမံခန့်ခွဲမှုနှင့် ဘတ်ဂျက် အစည်းအဝေး">
+            </div>
+
+            <!-- Output Language -->
+            <div class="form-group">
+              <label for="outputLanguageSelect" id="txt-outputLangLabel">ထွက်ရှိမည့် ဘာသာစကား:</label>
+              <select id="outputLanguageSelect" class="select-box">
+                <option value="bilingual" selected id="opt-langBilingual">မြန်မာ + English (နည်းပညာ/လုပ်ငန်းသုံး)</option>
+                <option value="pure_my" id="opt-langPureMy">မြန်မာဘာသာ သီးသန့် (Pure Burmese)</option>
+                <option value="english" id="opt-langEnglish">English ဘာသာပြန် (English Translation)</option>
+              </select>
+            </div>
+
+            <!-- AI Modes Selection Cards -->
+            <div class="form-group">
+              <label id="txt-aiModeLabel">မှတ်တမ်း ပုံစံ ရွေးချယ်ပါ:</label>
+              <div class="mode-grid" id="modeGrid">
+                <!-- Modes dynamically rendered or pre-filled -->
+                <div class="mode-option-card active" data-mode="summary">
+                  <div class="mode-icon">📌</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-summary">အကျဉ်းချုပ် အစီရင်ခံစာ (Executive Summary)</div>
+                    <div class="mode-desc" id="modeDesc-summary">အဓိက သဘောတူညီချက်များ၊ ဆုံးဖြတ်ချက်များနှင့် အနှစ်ချုပ်ကို အကျဉ်းရုံးဖော်ပြခြင်း</div>
+                  </div>
+                </div>
+
+                <div class="mode-option-card" data-mode="detailed">
+                  <div class="mode-icon">📝</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-detailed">အသေးစိတ် မှတ်တမ်း (Detailed Minutes)</div>
+                    <div class="mode-desc" id="modeDesc-detailed">အစီအစဉ်အလိုက် ဆွေးနွေးချက်များ၊ တင်ပြသူများနှင့် ဆွေးနွေးမှုအသေးစိတ်ကို အပြည့်အစုံ ရေးသားခြင်း</div>
+                  </div>
+                </div>
+
+                <div class="mode-option-card" data-mode="action_items">
+                  <div class="mode-icon">✅</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-action_items">လုပ်ဆောင်ရန်များနှင့် ဆုံးဖြတ်ချက်များ (Action Items & Decisions)</div>
+                    <div class="mode-desc" id="modeDesc-action_items">တာဝန်ခွဲဝေမှု၊ တာဝန်ခံ (Assignee)၊ ပြီးစီးရမည့်ရက် (Deadline) နှင့် ဆုံးဖြတ်ချက်များ ဇယား</div>
+                  </div>
+                </div>
+
+                <div class="mode-option-card" data-mode="discussion">
+                  <div class="mode-icon">🗣️</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-discussion">ဆွေးနွေးချက်များနှင့် အမေးအဖြေ (Discussion & Q&A)</div>
+                    <div class="mode-desc" id="modeDesc-discussion">အစည်းအဝေးတွင် မေးမြန်းခဲ့သော မေးခွန်းများ၊ ဖြေဆိုချက်များနှင့် မပြေလည်သေးသော အချက်များ</div>
+                  </div>
+                </div>
+
+                <div class="mode-option-card" data-mode="formal">
+                  <div class="mode-icon">📋</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-formal">တရားဝင် ရုံးသုံး မှတ်တမ်း (Formal Corporate Minutes)</div>
+                    <div class="mode-desc" id="modeDesc-formal">အဖွဲ့အစည်း၊ နေ့စွဲ၊ တက်ရောက်သူ၊ ဥက္ကဋ္ဌ၊ အတွင်းရေးမှူး နှင့် လက်မှတ်ရေးထိုးရန် နေရာပါဝင်သော စံပုံစံ</div>
+                  </div>
+                </div>
+
+                <div class="mode-option-card" data-mode="transcript">
+                  <div class="mode-icon">📜</div>
+                  <div>
+                    <div class="mode-title" id="modeTitle-transcript">သန့်စင်ပြီး စာသား အပြည့်အစုံ (Cleaned Transcript)</div>
+                    <div class="mode-desc" id="modeDesc-transcript">အသံဖိုင်မှ ပြောဆိုခဲ့သည်များကို စကားလုံးအလိုက် သန့်စင်ပြီး အချိန်မှတ်တမ်းနှင့်အတူ ရေးသားခြင်း</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Prompt Accordion -->
+            <div class="form-group">
+              <a href="javascript:void(0)" id="toggleCustomPromptLink" style="color:#38bdf8; font-size:0.88rem; text-decoration:none;">
+                <span id="txt-customPromptToggle">စိတ်ကြိုက် ညွှန်ကြားချက် ပေါင်းထည့်မည် (+)</span>
+              </a>
+              <div id="customPromptBox" class="hidden" style="margin-top:0.5rem;">
+                <textarea id="customPromptInput" class="textarea-box" rows="3" placeholder="ဥပမာ - ဘဏ္ဍာရေးနှင့် ဘတ်ဂျက်ဆွေးနွေးချက်ကို အထူးပြု မှတ်တမ်းတင်ပေးပါ..."></textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Card 3: Execution Method -->
+          <div class="card">
+            <div class="card-header">
+              <h2><span id="txt-step3Title">အဆင့် ၃ - မှတ်တမ်း ထုတ်ယူခြင်း</span></h2>
+            </div>
+
+            <!-- API Key Input -->
+            <div class="form-group" id="apiKeySection">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                <label for="apiKeyInput" id="txt-apiKeyLabel" style="margin-bottom:0;">Google AI Studio Free API Key:</label>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#38bdf8; font-size:0.8rem; text-decoration:none;" id="txt-getKeyBtn">Free Key ရယူရန် ↗</a>
+              </div>
+              <input type="password" id="apiKeyInput" class="input-text" placeholder="AIzaSy... (သင့် Browser တွင်သာ သိမ်းဆည်းမည်)">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                <label style="font-size:0.78rem; color:var(--text-muted); cursor:pointer;">
+                  <input type="checkbox" id="rememberKeyCheck" checked> <span id="txt-rememberKey">API Key ကို Browser တွင် အမြဲမှတ်ထားမည်</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generateBtn" class="btn btn-generate btn-block">
+              ✨ <span id="txt-generateBtn">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦</span>
+            </button>
+
+            <!-- Zero Key / Antigravity Hint -->
+            <div style="text-align:center; margin-top:0.75rem;">
+              <span style="font-size:0.8rem; color:var(--text-muted);">API Key မသုံးလိုပါက </span>
+              <a href="javascript:void(0)" id="jumpToAntigravityLink" style="font-size:0.8rem; color:#38bdf8; text-decoration:none; font-weight:600;">
+                Antigravity / Gemini Web နည်းလမ်းကို အသုံးပြုပါ ↗
+              </a>
+            </div>
+
+          </div>
+
+        </aside>
+
+        <!-- Right Column: Results & Interactive Minutes Editor -->
+        <section class="main-content-col">
+          
+          <!-- Generating Status Banner -->
+          <div id="statusBanner" class="status-banner hidden">
+            <div class="spinner"></div>
+            <div>
+              <div style="font-weight:600; color:#38bdf8;" id="statusBannerTitle">Gemini AI မှ အသံဖိုင်ကို နားထောင်ပြီး မှတ်တမ်းရေးနေပါသည်...</div>
+              <div style="font-size:0.82rem; color:var(--text-muted);" id="statusBannerDetail">မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်၊ ခေတ္တစောင့်ဆိုင်းပေးပါ...</div>
+            </div>
+          </div>
+
+          <!-- Result Container Card -->
+          <div class="card" id="resultCard">
+            
+            <div class="result-toolbar">
+              <!-- View mode tabs -->
+              <div class="result-tabs">
+                <button class="result-tab-btn active" data-view="formatted" id="btnViewFormatted">
+                  📄 <span id="txt-viewFormatted">လှပသော ပုံစံဖြင့် ကြည့်မည်</span>
+                </button>
+                <button class="result-tab-btn" data-view="raw" id="btnViewRaw">
+                  ✏️ <span id="txt-viewRaw">စာသား တည်းဖြတ်မည် (Edit)</span>
+                </button>
+                <button class="result-tab-btn" data-view="tasks" id="btnViewTasks">
+                  ☑️ <span id="txt-viewActions">လုပ်ဆောင်ရန် တာဝန်များ (Tasks)</span>
+                </button>
+              </div>
+
+              <!-- Export Buttons -->
+              <div class="export-group">
+                <button id="btnCopyResult" class="btn btn-secondary btn-sm" title="Copy to Clipboard">
+                  📋 <span id="txt-copyBtn">Copy ကူးမည်</span>
+                </button>
+                <button id="btnDownloadWord" class="btn btn-secondary btn-sm" title="Download Word (.doc)">
+                  📄 <span id="txt-downloadWord">Word (.doc)</span>
+                </button>
+                <button id="btnDownloadMd" class="btn btn-secondary btn-sm" title="Download Markdown (.md)">
+                  📑 <span id="txt-downloadMd">Markdown (.md)</span>
+                </button>
+                <button id="btnPrintPdf" class="btn btn-secondary btn-sm" title="Print or Save as PDF">
+                  🖨️ <span id="txt-printPdf">PDF / ပုံနှိပ်မည်</span>
+                </button>
+                <button id="btnSaveHistory" class="btn btn-primary btn-sm" title="Save to History">
+                  💾 <span id="txt-saveToHistory">သိမ်းမည်</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content Panes -->
+            <div class="result-content-container">
+              <!-- Pane 1: Rendered HTML View -->
+              <div id="resultFormattedView" class="minutes-rendered">
+                <div style="text-align:center; padding:5rem 2rem; color:var(--text-muted);">
+                  <div style="font-size:3rem; margin-bottom:1rem;">🎙️ ✨ 📋</div>
+                  <h3 style="font-size:1.2rem; color:#f1f5f9; margin-bottom:0.5rem;">အစည်းအဝေး မှတ်တမ်း မထုတ်ယူရသေးပါ</h3>
+                  <p style="font-size:0.9rem; max-width:480px; margin:0 auto;">
+                    ဘယ်ဘက်တွင် မြန်မာအသံဖိုင် ရွေးချယ်ပြီး လိုချင်သော ပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ် သို့မဟုတ် တာဝန်များ) ကို ရွေးချယ်ကာ "မှတ်တမ်း ထုတ်ယူမည်" ကို နှိပ်ပါ သို့မဟုတ် "နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ" ဖြင့် စမ်းသပ်ကြည့်နိုင်ပါသည်။
+                  </p>
+                </div>
+              </div>
+
+              <!-- Pane 2: Raw / Markdown Editor View -->
+              <div id="resultRawView" class="hidden">
+                <textarea id="rawMarkdownEditor" class="raw-textarea" spellcheck="false" placeholder="Markdown စာသားများကို ဤနေရာတွင် တိုက်ရိုက် ပြင်ဆင်ရေးသားနိုင်ပါသည်..."></textarea>
+              </div>
+
+              <!-- Pane 3: Interactive Action Items Checklist -->
+              <div id="resultTasksView" class="hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                  <h3 style="font-size:1.1rem; color:#38bdf8;" id="txt-actionItemCounter">လုပ်ဆောင်ရန် တာဝန်များ (Action Items):</h3>
+                  <span id="taskStatsBadge" class="badge-tag">0 / 0 ပြီးစီး</span>
+                </div>
+                <div id="actionItemsContainer">
+                  <p style="color:var(--text-muted); font-size:0.9rem;">ဤမှတ်တမ်းတွင် သီးသန့်ထုတ်ယူထားသော လုပ်ဆောင်ရန် တာဝန်များ မတွေ့ရှိသေးပါ။</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Meta -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);">
+              <div>
+                <span id="txt-wordCount">စကားလုံး အရေအတွက်:</span> <strong id="wordCountDisplay" style="color:#f1f5f9;">0</strong>
+              </div>
+              <div id="minutesTimestampDisplay">
+                <!-- Timestamp or model tag -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+    <!-- TAB 2: ANTIGRAVITY & GEMINI WEB WORKFLOW -->
+    <section id="tabContent-antigravity" class="tab-pane hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2><span id="txt-agTitle">Antigravity Subscription သို့မဟုတ် Gemini Web အသုံးပြုနည်း (API Key မလိုပါ)</span></h2>
+        </div>
+        <p style="color:#cbd5e1; margin-bottom:1.5rem;" id="txt-agIntro">
+          သင့်တွင် Antigravity subscription သို့မဟုတ် Gemini Advanced စာရင်းသွင်းမှု ရှိပြီး Gemini API Key မသုံးလိုပါက အောက်ပါ လွယ်ကူသော နည်းလမ်း ၂ မျိုးဖြင့် အသုံးပြုနိုင်ပါသည်:
+        </p>
+
+        <!-- Method 1: Gemini Web Workflow -->
+        <div style="background-color:rgba(15, 23, 42, 0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:2rem;">
+          <h3 style="font-size:1.15rem; color:#38bdf8; margin-bottom:1rem;" id="txt-agOption1Title">
+            နည်းလမ်း ၁ - Gemini Web စနစ် (အလွယ်ကူဆုံး - Browser တွင် ချက်ချင်းသုံးနိုင်သည်)
+          </h3>
+          <ul style="list-style:none; padding-left:0; line-height:2; margin-bottom:1.5rem; font-size:0.95rem; color:#e2e8f0;">
+            <li id="txt-agOpt1Step1">၁။ ဤ Web App တွင် အစည်းအဝေး ခေါင်းစဉ်နှင့် လိုချင်သော မှတ်တမ်းပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ်၊ တာဝန်များ စသည်) ကို ရွေးချယ်ပါ။</li>
+            <li id="txt-agOpt1Step2">၂။ အောက်ပါ 'မြန်မာ အစည်းအဝေး Prompt ကူးယူမည်' ခလုတ်ကို နှိပ်ပါ။</li>
+            <li id="txt-agOpt1Step3">၃။ Gemini Web (gemini.google.com) ကို ဖွင့်ပြီး သင့် အသံဖိုင်ကို ဆွဲထည့် (Upload) လိုက်ပါ။</li>
+            <li id="txt-agOpt1Step4">၄။ ကူးယူထားသော Prompt ကို Paste လုပ်ပြီး Enter နှိပ်ပါ။ (Gemini Advanced / Antigravity က မြန်မာအသံဖိုင်ကို တိုက်ရိုက် နားထောင်ပေးပါသည်)</li>
+            <li id="txt-agOpt1Step5">၅။ Gemini မှ ထွက်လာသော စာသားကို ဤနေရာတွင် ပြန်လည် Paste လုပ်ပေးလိုက်ပါက သပ်ရပ်လှပသော စာရွက်စာတမ်းပုံစံ၊ Word ဖိုင်နှင့် PDF အဖြစ် ချက်ချင်း ပြောင်းလဲပေးမည် ဖြစ်ပါသည်။</li>
+          </ul>
+
+          <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+            <button id="btnCopyAgPrompt" class="btn btn-primary">
+              📋 <span id="txt-copyOptimizedPromptBtn">မြန်မာ အစည်းအဝေး Prompt ကူးယူမည် 📋</span>
+            </button>
+            <a href="https://gemini.google.com" target="_blank" rel="noopener" class="btn btn-secondary" id="btnOpenGeminiWeb">
+              🚀 <span id="txt-openGeminiWebBtn">Gemini Web ဖွင့်မည် ↗</span>
+            </a>
+          </div>
+
+          <!-- Paste Back Area -->
+          <div class="form-group" style="margin-top:1.5rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
+            <label for="agPasteResultInput" style="font-weight:600; color:#38bdf8;" id="txt-pasteBackTitle">
+              Gemini မှ ထွက်လာသော အဖြေကို ဤနေရာတွင် ထည့်ပါ:
+            </label>
+            <textarea id="agPasteResultInput" class="textarea-box" rows="8" placeholder="Gemini မှ ရရှိလာသော အစည်းအဝေး မှတ်တမ်း စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ..."></textarea>
+            <button id="btnFormatPasted" class="btn btn-accent" style="margin-top:0.75rem;">
+              ✨ <span id="txt-formatPastedBtn">မှတ်တမ်း ပုံစံအဖြစ် ပြောင်းလဲပြီး သိမ်းဆည်းမည် ✨</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Method 2: Local CLI Bridge -->
+        <div style="background-color:rgba(15, 23, 42, 0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem;">
+          <h3 style="font-size:1.15rem; color:#34d399; margin-bottom:1rem;" id="txt-agOption2Title">
+            နည်းလမ်း ၂ - Local Antigravity CLI Bridge (စက်တွင်း အလိုအလျောက်ချိတ်ဆက်မှု)
+          </h3>
+          <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:1rem;" id="txt-agOpt2Desc">
+            သင့်ကွန်ပျူတာတွင် `agy` CLI ထည့်သွင်းထားပြီး Antigravity subscription ရှိပါက နောက်ခံ Bridge runner ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူပြီး မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်:
+          </p>
+          <div style="background:#0b1120; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-family:'JetBrains Mono', monospace; font-size:0.88rem; color:#38bdf8; margin-bottom:1rem;">
+            python3 bridge.py
+          </div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <span id="txt-agBridgeStatusLabel" style="font-size:0.88rem; color:var(--text-muted);">Bridge ချိတ်ဆက်မှု အခြေအနေ:</span>
+            <span id="bridgeStatusBadge" class="badge-tag">စစ်ဆေးနေပါသည်...</span>
+            <button id="btnCheckBridge" class="btn btn-outline btn-sm">ပြန်လည်စစ်ဆေးမည် 🔄</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 3: MEETING HISTORY -->
+    <section id="tabContent-history" class="tab-pane hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2><span id="txt-historyTitle">သိမ်းဆည်းထားသော အစည်းအဝေး မှတ်တမ်းများ</span></h2>
+          <button id="btnClearAllHistory" class="btn btn-outline btn-sm" style="color:#f87171; border-color:rgba(248, 113, 113, 0.4);">
+            🗑️ <span id="txt-historyDeleteAll">အားလုံး ဖျက်မည်</span>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="historySearchInput" class="input-text" placeholder="ခေါင်းစဉ် သို့မဟုတ် အကြောင်းအရာ ရှာဖွေပါ...">
+        </div>
+
+        <div id="historyListContainer">
+          <p style="color:var(--text-muted); font-size:0.95rem; text-align:center; padding:3rem 0;" id="txt-historyEmpty">
+            ယခုအချိန်အထိ သိမ်းဆည်းထားသော အစည်းအဝေးမှတ်တမ်း မရှိသေးပါ။
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SETTINGS -->
+    <section id="tabContent-settings" class="tab-pane hidden">
+      <div class="card" style="max-width:700px; margin:0 auto;">
+        <div class="card-header">
+          <h2><span id="txt-tabSettingsTitle">ချိန်ညှိချက်များ (Settings)</span></h2>
+        </div>
+
+        <div class="form-group">
+          <label for="settingsApiKeyInput" id="txt-settingsApiKeyLabel">Google AI Studio API Key:</label>
+          <input type="password" id="settingsApiKeyInput" class="input-text" placeholder="AIzaSy...">
+          <small style="color:var(--text-muted); font-size:0.8rem; display:block; margin-top:0.25rem;">
+            အခမဲ့ API Key ကို <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#38bdf8;">Google AI Studio</a> တွင် ရယူနိုင်ပါသည်။ Key သည် သင့် Browser ၏ LocalStorage တွင်သာ လုံခြုံစွာ သိမ်းဆည်းပါသည်။
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="settingsModelSelect" id="txt-modelSelectLabel">Gemini Model:</label>
+          <select id="settingsModelSelect" class="select-box">
+            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (အကြံပြုထားသည် - အမြန်ဆုံးနှင့် အသစ်ဆုံး)</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro (နက်နဲစွာ သုံးသပ်ရန်)</option>
+          </select>
+        </div>
+
+        <div style="border-top:1px solid var(--border-color); padding-top:1.5rem; margin-top:1.5rem;">
+          <button id="btnSaveSettings" class="btn btn-primary">
+            💾 သိမ်းဆည်းမည် (Save Settings)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: HELP & FAQ -->
+    <section id="tabContent-help" class="tab-pane hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2><span id="txt-helpTitle">အသုံးပြုပုံ လမ်းညွှန်နှင့် မကြာခဏ မေးလေ့ရှိသော မေးခွန်းများ</span></h2>
+        </div>
+        
+        <div style="line-height:1.8; color:#cbd5e1;">
+          <h3 style="font-size:1.1rem; color:#38bdf8; margin-top:1rem;" id="txt-helpQ1">၁။ Backend ဆာဗာ မရှိဘဲ ဘယ်လို အလုပ်လုပ်တာလဲ?</h3>
+          <p id="txt-helpA1" style="font-size:0.92rem; margin-bottom:1.5rem;">
+            ဤ Web App သည် သင့် Browser အတွင်း၌သာ ၁၀၀% အလုပ်လုပ်ပါသည်။ သင့်အသံဖိုင်များနှင့် မှတ်တမ်းများသည် သင့်ကွန်ပျူတာမှ အခြားဆာဗာများသို့ မရောက်ရှိဘဲ လုံခြုံစိတ်ချရပါသည်။ Google AI Studio ကို သုံးလျှင်လည်း Browser မှ Google API သို့ တိုက်ရိုက် လုံခြုံစွာ ဆက်သွယ်ပါသည်။
+          </p>
+
+          <h3 style="font-size:1.1rem; color:#38bdf8;" id="txt-helpQ2">၂။ မြန်မာစကား အသံဖိုင်များကို AI က ကောင်းစွာ နားလည်ပါသလား?</h3>
+          <p id="txt-helpA2" style="font-size:0.92rem; margin-bottom:1.5rem;">
+            Gemini 2.5 Flash / 1.5 Flash သည် မြန်မာဘာသာ အသံဖိုင်များကို တိုက်ရိုက် နားထောင်နိုင်စွမ်း ရှိပါသည်။ အစည်းအဝေးများတွင် သုံးလေ့ရှိသော မြန်မာ+English ရောနှောစကားများ (Code-switching) နှင့် ရုံးသုံး ဝေါဟာရများကို သဘာဝကျကျ အစည်းအဝေးမှတ်တမ်းအဖြစ် ပြောင်းလဲပေးနိုင်ရန် စနစ်တကျ Prompt များ ချိန်ညှိထားပါသည်။
+          </p>
+
+          <h3 style="font-size:1.1rem; color:#38bdf8;" id="txt-helpQ3">၃။ အသံဖိုင် အရွယ်အစား ကြီးမားနေပါက ဘာလုပ်ရမလဲ?</h3>
+          <p id="txt-helpA3" style="font-size:0.92rem; margin-bottom:1.5rem;">
+            မိနစ် ၆၀ အထက် အသံဖိုင်ကြီးများအတွက် နည်းလမ်း ၁ (Gemini Web သို့ တိုက်ရိုက် တင်ခြင်း) ကို အကြံပြုပါသည်။ Gemini Web သည် ဖိုင်ကြီးများကို အခမဲ့ အကန့်အသတ်မရှိ လက်ခံပြီး ဤ App မှ ထုတ်ပေးသော Prompt နှင့် ပေါင်းစပ်ပါက အကောင်းဆုံး ရလဒ် ရရှိပါမည်။
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="toast" class="toast"></div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/i18n.js"></script>
+  <script src="js/modes.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/antigravity.js"></script>
+  <script src="js/sample-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
