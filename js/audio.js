@@ -29,6 +29,9 @@ class AudioEngine {
     this.onLoadedMetadata = null;
     this.onEnded = null;
     this.onRecordingProgress = null;
+    this.onError = null;
+    this.onSpeechTranscript = null;
+    this.recognition = null;
 
     if (this.audioElement) {
       this._initAudioEvents();
@@ -56,6 +59,10 @@ class AudioEngine {
 
     this.audioElement.addEventListener('ended', () => {
       if (this.onEnded) this.onEnded();
+    });
+
+    this.audioElement.addEventListener('error', (err) => {
+      if (this.onError) this.onError(err);
     });
   }
 
@@ -167,6 +174,44 @@ class AudioEngine {
     this.isPaused = false;
     this.recordingStartTime = Date.now();
 
+    // Initialize Web Speech API for real-time Burmese dictation if supported
+    const SpeechRecognitionClass = typeof window !== 'undefined'
+      ? (window.SpeechRecognition || window.webkitSpeechRecognition)
+      : null;
+
+    if (SpeechRecognitionClass) {
+      try {
+        this.recognition = new SpeechRecognitionClass();
+        this.recognition.lang = 'my-MM'; // Burmese
+        this.recognition.continuous = true;
+        this.recognition.interimResults = true;
+        let finalTranscript = '';
+
+        this.recognition.onresult = (event) => {
+          let interimTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript + ' ';
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          const fullText = (finalTranscript + interimTranscript).trim();
+          if (this.onSpeechTranscript && fullText) {
+            this.onSpeechTranscript(fullText);
+          }
+        };
+
+        this.recognition.onerror = (e) => {
+          console.warn('Speech recognition notice:', e.error);
+        };
+
+        this.recognition.start();
+      } catch (speechErr) {
+        console.warn('Could not start SpeechRecognition:', speechErr);
+      }
+    }
+
     this.recordingTimerId = setInterval(() => {
       if (this.onRecordingProgress && !this.isPaused) {
         const elapsedSec = Math.floor((Date.now() - this.recordingStartTime) / 1000);
@@ -207,6 +252,13 @@ class AudioEngine {
         }
         if (this.stream) {
           this.stream.getTracks().forEach(track => track.stop());
+        }
+
+        if (this.recognition) {
+          try {
+            this.recognition.stop();
+          } catch (e) {}
+          this.recognition = null;
         }
 
         const type = this.mediaRecorder.mimeType || 'audio/webm';

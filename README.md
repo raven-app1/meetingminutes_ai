@@ -107,15 +107,16 @@ or:
 node --test tests/run_all.js
 ```
 
-All 26 unit and integration tests verify:
+All 30 unit and integration tests verify:
 - AI modes and Burmese prompt generation
-- Bilingual i18n dictionary completeness
+- Bilingual i18n dictionary completeness (မြန်မာ & English parity)
 - Markdown to HTML parsing and table rendering
 - Myanmar substring collision handling in Action Items
+- Checklist and bullet-point action item extraction with assignee and deadline parsing
 - Gemini API payload construction and MIME normalization
 - StorageManager persistence with IndexedDB and fallback
-- Antigravity prompt bundle generation and bridge health checks
-- Audio engine time and byte formatting
+- Antigravity prompt bundle generation with transcript support and bridge health checks
+- Audio engine time, byte formatting, and Web Speech API dictation callbacks
 - XSS prevention and script tag sanitization
 
 ---

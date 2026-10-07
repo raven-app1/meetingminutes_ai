@@ -242,31 +242,64 @@
               <h2><span id="txt-step3Title">အဆင့် ၃ - မှတ်တမ်း ထုတ်ယူခြင်း</span></h2>
             </div>
 
-            <!-- API Key Input -->
-            <div class="form-group" id="apiKeySection">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-                <label for="apiKeyInput" id="txt-apiKeyLabel" style="margin-bottom:0;">Google AI Studio Free API Key:</label>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#38bdf8; font-size:0.8rem; text-decoration:none;" id="txt-getKeyBtn">Free Key ရယူရန် ↗</a>
-              </div>
-              <input type="password" id="apiKeyInput" class="input-text" placeholder="AIzaSy... (သင့် Browser တွင်သာ သိမ်းဆည်းမည်)">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
-                <label style="font-size:0.78rem; color:var(--text-muted); cursor:pointer;">
-                  <input type="checkbox" id="rememberKeyCheck" checked> <span id="txt-rememberKey">API Key ကို Browser တွင် အမြဲမှတ်ထားမည်</span>
-                </label>
+            <!-- Execution Mode Tabs -->
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label style="font-weight:600; color:#38bdf8; font-size:0.86rem;" id="txt-execModeLabel">လုပ်ဆောင်မည့် နည်းလမ်း ရွေးချယ်ပါ:</label>
+              <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:0.5rem; margin-top:0.4rem;">
+                <button type="button" id="btnModeAntigravity" class="btn btn-secondary active-method" style="font-size:0.8rem; padding:0.55rem 0.4rem; text-align:center;">
+                  <span id="txt-execModeAntigravity">⚡ Antigravity / Zero Key</span>
+                </button>
+                <button type="button" id="btnModeApiKey" class="btn btn-outline" style="font-size:0.8rem; padding:0.55rem 0.4rem; text-align:center;">
+                  <span id="txt-execModeApiKey">🔑 Gemini API Key</span>
+                </button>
               </div>
             </div>
 
-            <!-- Generate Button -->
-            <button id="generateBtn" class="btn btn-generate btn-block">
-              ✨ <span id="txt-generateBtn">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦</span>
-            </button>
+            <!-- Panel A: Antigravity / Zero Key View (Default) -->
+            <div id="execPanelAntigravity">
+              <div style="background:rgba(15, 23, 42, 0.7); border:1px solid rgba(56, 189, 248, 0.2); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:0.85rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                  <span style="font-size:0.8rem; color:var(--text-muted);">Bridge:</span>
+                  <span id="bridgeStatusBadgeMini" class="badge-tag">စစ်ဆေးနေပါသည်...</span>
+                </div>
+                <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;">
+                  Antigravity subscription ဖြင့် API Key မလိုဘဲ မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်။
+                </div>
+              </div>
 
-            <!-- Zero Key / Antigravity Hint -->
-            <div style="text-align:center; margin-top:0.75rem;">
-              <span style="font-size:0.8rem; color:var(--text-muted);">API Key မသုံးလိုပါက </span>
-              <a href="javascript:void(0)" id="jumpToAntigravityLink" style="font-size:0.8rem; color:#38bdf8; text-decoration:none; font-weight:600;">
-                Antigravity / Gemini Web နည်းလမ်းကို အသုံးပြုပါ ↗
-              </a>
+              <!-- Primary Generate Button for Antigravity -->
+              <button id="generateAgBtn" class="btn btn-generate btn-block">
+                ✨ <span id="txt-generateBtn">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦</span>
+              </button>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
+                <button id="btnQuickBridgeRun" type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; border-color:rgba(52, 211, 153, 0.4); color:#34d399; padding:0.4rem 0.3rem;">
+                  ⚡ <span id="txt-runViaBridgeBtn">Local Bridge</span>
+                </button>
+                <button id="btnQuickGeminiWeb" type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:0.4rem 0.3rem;">
+                  🌐 <span id="txt-runViaGeminiWebBtn">Gemini Web</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel B: Direct Gemini API Key View (Optional) -->
+            <div id="execPanelApiKey" class="hidden">
+              <div class="form-group" id="apiKeySection">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                  <label for="apiKeyInput" id="txt-apiKeyLabel" style="margin-bottom:0;">Google AI Studio Free API Key:</label>
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#38bdf8; font-size:0.8rem; text-decoration:none;" id="txt-getKeyBtn">Free Key ရယူရန် ↗</a>
+                </div>
+                <input type="password" id="apiKeyInput" class="input-text" placeholder="AIzaSy... (သင့် Browser တွင်သာ သိမ်းဆည်းမည်)">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                  <label style="font-size:0.78rem; color:var(--text-muted); cursor:pointer;">
+                    <input type="checkbox" id="rememberKeyCheck" checked> <span id="txt-rememberKey">API Key ကို Browser တွင် အမြဲမှတ်ထားမည်</span>
+                  </label>
+                </div>
+              </div>
+
+              <button id="generateBtn" class="btn btn-generate btn-block">
+                ✨ <span id="txt-runViaApiKeyBtn">API Key ဖြင့် တိုက်ရိုက် ထုတ်ယူမည်</span>
+              </button>
             </div>
 
           </div>
@@ -424,10 +457,13 @@
           <div style="background:#0b1120; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-family:'JetBrains Mono', monospace; font-size:0.88rem; color:#38bdf8; margin-bottom:1rem;">
             python3 bridge.py
           </div>
-          <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
             <span id="txt-agBridgeStatusLabel" style="font-size:0.88rem; color:var(--text-muted);">Bridge ချိတ်ဆက်မှု အခြေအနေ:</span>
             <span id="bridgeStatusBadge" class="badge-tag">စစ်ဆေးနေပါသည်...</span>
             <button id="btnCheckBridge" class="btn btn-outline btn-sm">ပြန်လည်စစ်ဆေးမည် 🔄</button>
+            <button id="btnRunBridgeNow" class="btn btn-accent btn-sm">
+              ⚡ <span id="txt-runBridgeNowBtn">Current Meeting ကို Bridge ဖြင့် စမ်းသပ် run မည်</span>
+            </button>
           </div>
         </div>
 

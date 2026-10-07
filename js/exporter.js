@@ -196,20 +196,32 @@ class DocumentExporter {
   }
 
   /**
-   * Extracts Action Items from Markdown tables or bullet lists.
+   * Extracts Action Items from Markdown tables, task checklists, and bullet lists.
    */
   static extractActionItems(markdown) {
     const items = [];
     if (!markdown) return items;
 
-    // Search for tables with "တာဝန်" or "Action Item"
     const lines = markdown.split(/\r?\n/);
     let inActionTable = false;
+    let inActionSection = false;
     let colIndices = { task: -1, owner: -1, due: -1, priority: -1 };
 
-    for (let line of lines) {
-      if (line.includes('|') && (line.includes('တာဝန်') || line.includes('Action') || line.includes('Task'))) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // Check for section headings
+      if (/^#{1,4}\s+.*(လုပ်ဆောင်ရန်|တာဝန်|action item|next step|task|အစီအမံ)/i.test(trimmed)) {
+        inActionSection = true;
+      } else if (/^#{1,4}\s+/.test(trimmed)) {
+        inActionSection = false;
+      }
+
+      // Check for Table Headers
+      if (line.includes('|') && (line.includes('တာဝန်') || /action|task/i.test(line))) {
         inActionTable = true;
+        colIndices = { task: -1, owner: -1, due: -1, priority: -1 };
         const headers = line.split('|').map(h => h.trim().toLowerCase());
         headers.forEach((h, idx) => {
           if (h.includes('တာဝန်ခံ') || h.includes('owner') || h.includes('assignee')) {
@@ -224,32 +236,125 @@ class DocumentExporter {
       }
 
       if (inActionTable && line.includes('|')) {
-        // Skip separator
         if (/^[\s|:-]+$/.test(line)) continue;
         const cells = line.split('|').map(c => c.trim());
         if (cells.length > 2) {
-          const task = colIndices.task !== -1 ? cells[colIndices.task] : cells[1];
+          // If task col index is not found, search for the cell with meaningful text (skip index 0 empty, index 1 number)
+          let task = '';
+          if (colIndices.task !== -1 && cells[colIndices.task]) {
+            task = cells[colIndices.task];
+          } else {
+            for (let c = 1; c < cells.length; c++) {
+              if (cells[c] && !/^[\d\u1040-\u1049.\s-]+$/.test(cells[c])) {
+                task = cells[c];
+                break;
+              }
+            }
+          }
           const owner = colIndices.owner !== -1 ? cells[colIndices.owner] : (cells[2] || '-');
           const due = colIndices.due !== -1 ? cells[colIndices.due] : (cells[3] || '-');
           const priority = colIndices.priority !== -1 ? cells[colIndices.priority] : (cells[4] || '-');
 
-          if (task && task !== 'လုပ်ဆောင်ရန် တာဝန်' && !task.startsWith('---')) {
+          if (task && !task.startsWith('---') && !/^(လုပ်ဆောင်ရန် တာဝန်|task|action item)$/i.test(task)) {
             items.push({
               id: 'task_' + items.length,
-              task: task.replace(/[*_]/g, ''),
-              owner: owner.replace(/[*_]/g, ''),
-              due: due.replace(/[*_]/g, ''),
-              priority: priority.replace(/[*_]/g, ''),
+              task: task.replace(/[*_]/g, '').trim(),
+              owner: (owner || '-').replace(/[*_]/g, '').trim(),
+              due: (due || '-').replace(/[*_]/g, '').trim(),
+              priority: (priority || '-').replace(/[*_]/g, '').trim(),
               completed: false
             });
           }
         }
+        continue;
       } else if (inActionTable && !line.includes('|')) {
         inActionTable = false;
+      }
+
+      // Check for Checklist item: - [ ] or - [x]
+      const checklistMatch = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)/);
+      if (checklistMatch) {
+        const isChecked = checklistMatch[1].toLowerCase() === 'x';
+        const taskText = checklistMatch[2];
+        const parsed = DocumentExporter._parseTaskMeta(taskText);
+        items.push({
+          id: 'task_' + items.length,
+          task: parsed.task,
+          owner: parsed.owner,
+          due: parsed.due,
+          priority: parsed.priority,
+          completed: isChecked
+        });
+        continue;
+      }
+
+      // Check for bullet or numbered list inside Action Items section
+      if (inActionSection) {
+        const listMatch = line.match(/^([-*]|\d+\.)\s+(.*)/);
+        if (listMatch) {
+          const content = listMatch[2].trim();
+          if (content && content.length > 3) {
+            const parsed = DocumentExporter._parseTaskMeta(content);
+            items.push({
+              id: 'task_' + items.length,
+              task: parsed.task,
+              owner: parsed.owner,
+              due: parsed.due,
+              priority: parsed.priority,
+              completed: false
+            });
+          }
+        }
       }
     }
 
     return items;
+  }
+
+  static _parseTaskMeta(text) {
+    let clean = text.replace(/[*_]/g, '').trim();
+    let owner = '-';
+    let due = '-';
+    let priority = '-';
+
+    function extractField(regexList) {
+      for (const rx of regexList) {
+        const m = clean.match(rx);
+        if (m) {
+          let val = m[1].trim();
+          val = val.replace(/\s+[-–—].*$/, '').replace(/[,;|()]+$/, '').trim();
+          clean = clean.replace(m[0], ' ');
+          return val;
+        }
+      }
+      return '-';
+    }
+
+    owner = extractField([
+      /(?:တာဝန်ခံ|owner|assignee)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline|ဦးစားပေး|priority)|$))/i,
+      /(?:တာဝန်ခံ|owner|assignee)\s*[:：\-]\s*([^,;|()]+)/i
+    ]);
+
+    due = extractField([
+      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|owner|assignee|ဦးစားပေး|priority)|$))/i,
+      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+)/i
+    ]);
+
+    priority = extractField([
+      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|owner|assignee|သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)|$))/i,
+      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+)/i
+    ]);
+
+    // Clean up leftover parentheses or dashes
+    clean = clean.replace(/[()\[\]{}|]+/g, ' ').replace(/\s+[-–—]\s+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    clean = clean.replace(/^[-–—:\s]+|[-–—:\s]+$/g, '');
+
+    return {
+      task: clean || text.replace(/[*_]/g, '').trim(),
+      owner,
+      due,
+      priority
+    };
   }
 
   /**
@@ -275,11 +380,11 @@ class DocumentExporter {
   <![endif]-->
   <style>
     body {
-      font-family: 'Pyidaungsu', 'Myanmar3', 'Noto Sans Myanmar', 'Segoe UI', Arial, sans-serif;
-      font-size: 11pt;
-      line-height: 1.6;
+      font-family: 'Pyidaungsu', 'Myanmar3', 'Noto Sans Myanmar', 'Masterpiece Uni Sans', 'Segoe UI', Arial, sans-serif;
+      font-size: 11.5pt;
+      line-height: 1.85;
       color: #1e293b;
-      margin: 1.5in 1in 1in 1in;
+      margin: 1.2in 1in 1in 1in;
     }
     h1 {
       font-size: 18pt;

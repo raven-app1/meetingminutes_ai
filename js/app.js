@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     currentMeetingId: null,
     isGenerating: false,
     apiKey: storage.getSetting('api_key', ''),
-    selectedModel: storage.getSetting('model', 'gemini-2.5-flash')
+    selectedModel: storage.getSetting('model', 'gemini-2.5-flash'),
+    execMethod: storage.getSetting('exec_method', 'antigravity')
   };
 
   // --- DOM Elements Cache ---
@@ -72,6 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
     apiKeyInput: document.getElementById('apiKeyInput'),
     rememberKeyCheck: document.getElementById('rememberKeyCheck'),
     generateBtn: document.getElementById('generateBtn'),
+    generateAgBtn: document.getElementById('generateAgBtn'),
+    btnModeAntigravity: document.getElementById('btnModeAntigravity'),
+    btnModeApiKey: document.getElementById('btnModeApiKey'),
+    execPanelAntigravity: document.getElementById('execPanelAntigravity'),
+    execPanelApiKey: document.getElementById('execPanelApiKey'),
+    bridgeStatusBadgeMini: document.getElementById('bridgeStatusBadgeMini'),
+    btnQuickBridgeRun: document.getElementById('btnQuickBridgeRun'),
+    btnQuickGeminiWeb: document.getElementById('btnQuickGeminiWeb'),
+    btnRunBridgeNow: document.getElementById('btnRunBridgeNow'),
     jumpToAntigravityLink: document.getElementById('jumpToAntigravityLink'),
     statusBanner: document.getElementById('statusBanner'),
     statusBannerTitle: document.getElementById('statusBannerTitle'),
@@ -118,8 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     elements.settingsModelSelect.value = state.selectedModel;
 
-    // Apply initial localization
+    // Apply initial localization and execution mode
     applyLanguage(state.currentLang);
+    setExecMethod(state.execMethod);
 
     // Bind event handlers
     setupEventListeners();
@@ -233,13 +244,37 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Jump to Antigravity link
-    elements.jumpToAntigravityLink.addEventListener('click', () => {
-      switchMainTab('antigravity');
-    });
+    // Execution method switcher
+    if (elements.btnModeAntigravity && elements.btnModeApiKey) {
+      elements.btnModeAntigravity.addEventListener('click', () => setExecMethod('antigravity'));
+      elements.btnModeApiKey.addEventListener('click', () => setExecMethod('apikey'));
+    }
 
-    // Generate Button
-    elements.generateBtn.addEventListener('click', handleGenerateMinutes);
+    // Antigravity Generation Buttons
+    if (elements.generateAgBtn) {
+      elements.generateAgBtn.addEventListener('click', handleGenerateAntigravity);
+    }
+    if (elements.btnQuickBridgeRun) {
+      elements.btnQuickBridgeRun.addEventListener('click', handleQuickBridgeRun);
+    }
+    if (elements.btnQuickGeminiWeb) {
+      elements.btnQuickGeminiWeb.addEventListener('click', handleQuickGeminiWeb);
+    }
+    if (elements.btnRunBridgeNow) {
+      elements.btnRunBridgeNow.addEventListener('click', handleQuickBridgeRun);
+    }
+
+    // Direct Gemini API Key Generate Button
+    if (elements.generateBtn) {
+      elements.generateBtn.addEventListener('click', handleGenerateMinutes);
+    }
+
+    // Jump to Antigravity link
+    if (elements.jumpToAntigravityLink) {
+      elements.jumpToAntigravityLink.addEventListener('click', () => {
+        switchMainTab('antigravity');
+      });
+    }
 
     // Results View Tabs (Formatted / Raw Edit / Tasks)
     elements.resultTabs.forEach(btn => {
@@ -481,6 +516,15 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.recordTimer.textContent = formattedTime;
     };
 
+    audioEngine.onSpeechTranscript = (recognizedText) => {
+      elements.transcriptTextInput.value = recognizedText;
+      state.currentTranscriptText = recognizedText;
+    };
+
+    audioEngine.onError = () => {
+      showToast(t('audioDecodeError'));
+    };
+
     // Sample Loader
     elements.loadSampleBtn.addEventListener('click', () => {
       const demoBlob = createSyntheticDemoAudio();
@@ -533,6 +577,141 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Generation Workflow ---
+  // --- Execution Method Switcher ---
+  function setExecMethod(method) {
+    state.execMethod = method;
+    storage.setSetting('exec_method', method);
+
+    if (elements.btnModeAntigravity && elements.btnModeApiKey) {
+      elements.btnModeAntigravity.classList.toggle('active-method', method === 'antigravity');
+      elements.btnModeAntigravity.classList.toggle('btn-secondary', method === 'antigravity');
+      elements.btnModeAntigravity.classList.toggle('btn-outline', method !== 'antigravity');
+
+      elements.btnModeApiKey.classList.toggle('active-method', method === 'apikey');
+      elements.btnModeApiKey.classList.toggle('btn-secondary', method === 'apikey');
+      elements.btnModeApiKey.classList.toggle('btn-outline', method !== 'apikey');
+    }
+
+    if (elements.execPanelAntigravity && elements.execPanelApiKey) {
+      elements.execPanelAntigravity.classList.toggle('hidden', method !== 'antigravity');
+      elements.execPanelApiKey.classList.toggle('hidden', method !== 'apikey');
+    }
+  }
+
+  // --- Generation Workflow ---
+
+  /**
+   * Primary Zero-API-Key Antigravity Workflow
+   */
+  async function handleGenerateAntigravity() {
+    if (state.isGenerating) return;
+
+    const textInput = elements.transcriptTextInput.value.trim();
+    if (!state.currentAudioBlob && !textInput) {
+      alert(t('alertNoAudio'));
+      return;
+    }
+
+    // Check if CLI Bridge is active
+    const health = await checkBridgeStatus();
+    if (health.available) {
+      await runViaBridge(textInput);
+    } else {
+      await handleQuickGeminiWeb();
+    }
+  }
+
+  async function handleQuickBridgeRun() {
+    if (state.isGenerating) return;
+
+    const textInput = elements.transcriptTextInput.value.trim();
+    if (!state.currentAudioBlob && !textInput) {
+      alert(t('alertNoAudio'));
+      return;
+    }
+
+    const health = await checkBridgeStatus();
+    if (!health.available) {
+      alert(state.currentLang === 'my'
+        ? 'Local Antigravity Bridge ချိတ်ဆက်မထားပါ။ ကျေးဇူးပြု၍ Terminal တွင် `python3 bridge.py` ကို run ပေးပါ (သို့မဟုတ် Gemini Web workflow ကို သုံးပါ)။'
+        : 'Local Antigravity Bridge is offline. Please run `python3 bridge.py` in your terminal or use the Gemini Web workflow.');
+      return;
+    }
+
+    await runViaBridge(textInput);
+  }
+
+  async function runViaBridge(textInput) {
+    state.isGenerating = true;
+    showGeneratingStatus(true, t('bridgeRunningText'));
+
+    try {
+      const prompt = buildGeminiPrompt({
+        mode: state.selectedMode,
+        language: state.selectedOutputLang,
+        meetingTitle: elements.meetingTitleInput.value.trim(),
+        customPrompt: elements.customPromptInput.value.trim(),
+        isAudioInput: !!state.currentAudioBlob
+      });
+
+      let fullPrompt = prompt;
+      if (textInput) {
+        fullPrompt = `MEETING TRANSCRIPT / RECORDING NOTES:\n${textInput}\n\n${prompt}`;
+      } else if (state.currentAudioName) {
+        fullPrompt = `MEETING RECORDING FILE: ${state.currentAudioName}\n${prompt}`;
+      }
+
+      elements.statusBannerDetail.textContent = state.currentLang === 'my'
+        ? 'Antigravity CLI (agy) သို့ ပေးပို့ပြီး မှတ်တမ်း ရေးသားနေပါသည်...'
+        : 'Executing prompt through authenticated Antigravity CLI...';
+
+      const generated = await agHelper.executeViaLocalBridge({
+        prompt: fullPrompt,
+        model: state.selectedModel
+      });
+
+      setGeneratedResult(generated);
+      await saveCurrentMeetingToHistory();
+      if (state.currentTab !== 'studio') {
+        switchMainTab('studio');
+      }
+      showToast(t('alertSuccessGenerated'));
+
+    } catch (err) {
+      console.error("Bridge generation error:", err);
+      alert(t('alertError') + err.message);
+    } finally {
+      state.isGenerating = false;
+      showGeneratingStatus(false);
+    }
+  }
+
+  async function handleQuickGeminiWeb() {
+    const textInput = elements.transcriptTextInput.value.trim();
+    const bundle = agHelper.buildGeminiWebBundle({
+      mode: state.selectedMode,
+      language: state.selectedOutputLang,
+      meetingTitle: elements.meetingTitleInput.value.trim(),
+      customPrompt: elements.customPromptInput.value.trim(),
+      transcriptText: textInput,
+      isAudioInput: !!state.currentAudioBlob
+    });
+
+    try {
+      await navigator.clipboard.writeText(bundle.fullBundle);
+    } catch (e) {
+      // clipboard fallback
+    }
+
+    switchMainTab('antigravity');
+    showToast(state.currentLang === 'my'
+      ? 'Gemini Web Prompt Bundle ကို Copy ကူးပြီးပါပြီ! Gemini Web တွင် အသံဖိုင်နှင့်အတူ Paste လုပ်ပါ'
+      : 'Gemini Web prompt bundle copied! Paste into Gemini Web with your audio file');
+  }
+
+  /**
+   * Direct Gemini API Key Generation (Optional)
+   */
   async function handleGenerateMinutes() {
     if (state.isGenerating) return;
 
@@ -546,9 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check API Key
     const apiKey = elements.apiKeyInput.value.trim() || state.apiKey;
     if (!apiKey) {
-      if (confirm(t('alertNoApiKey') + '\n\nAntigravity / Gemini Web Guide ကို ကြည့်လိုပါသလား?')) {
-        switchMainTab('antigravity');
-      }
+      alert(t('alertNoApiKey'));
       return;
     }
 
@@ -592,12 +769,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (show) {
       elements.statusBannerTitle.textContent = title;
       elements.statusBanner.classList.remove('hidden');
-      elements.generateBtn.disabled = true;
-      elements.generateBtn.style.opacity = '0.6';
+      [elements.generateBtn, elements.generateAgBtn, elements.btnQuickBridgeRun].forEach(btn => {
+        if (btn) {
+          btn.disabled = true;
+          btn.style.opacity = '0.6';
+        }
+      });
     } else {
       elements.statusBanner.classList.add('hidden');
-      elements.generateBtn.disabled = false;
-      elements.generateBtn.style.opacity = '1';
+      [elements.generateBtn, elements.generateAgBtn, elements.btnQuickBridgeRun].forEach(btn => {
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      });
     }
   }
 
@@ -781,20 +966,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Antigravity Bridge Status ---
   async function checkBridgeStatus() {
-    const badge = elements.bridgeStatusBadge;
-    badge.textContent = state.currentLang === 'my' ? 'စစ်ဆေးနေပါသည်...' : 'Checking...';
-    badge.style.color = '#38bdf8';
+    const badges = [elements.bridgeStatusBadge, elements.bridgeStatusBadgeMini].filter(Boolean);
+    badges.forEach(badge => {
+      badge.textContent = state.currentLang === 'my' ? 'စစ်ဆေးနေပါသည်...' : 'Checking...';
+      badge.style.color = '#38bdf8';
+    });
 
     const health = await agHelper.checkBridgeHealth();
-    if (health.available) {
-      badge.textContent = state.currentLang === 'my' ? 'ချိတ်ဆက်မိပါသည် (Active)' : 'Connected (Active)';
-      badge.style.color = '#34d399';
-      badge.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
-    } else {
-      badge.textContent = state.currentLang === 'my' ? 'ချိတ်ဆက်မထားပါ (Offline)' : 'Disconnected (Offline)';
-      badge.style.color = '#94a3b8';
-      badge.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
-    }
+    badges.forEach(badge => {
+      if (health.available) {
+        badge.textContent = state.currentLang === 'my' ? 'ချိတ်ဆက်မိပါသည် (Active)' : 'Connected (Active)';
+        badge.style.color = '#34d399';
+        badge.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+      } else {
+        badge.textContent = state.currentLang === 'my' ? 'ချိတ်ဆက်မထားပါ (Offline)' : 'Disconnected (Offline)';
+        badge.style.color = '#94a3b8';
+        badge.style.backgroundColor = 'rgba(148, 163, 184, 0.1)';
+      }
+    });
+
+    return health;
   }
 
   // --- Utility Toast ---

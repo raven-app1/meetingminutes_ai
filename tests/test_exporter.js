@@ -66,3 +66,38 @@ test('DocumentExporter.extractActionItems handles empty or invalid inputs gracef
   assert.deepStrictEqual(DocumentExporter.extractActionItems(null), []);
   assert.deepStrictEqual(DocumentExporter.extractActionItems('Just plain text without tables'), []);
 });
+
+test('DocumentExporter.extractActionItems extracts action items from Markdown checklists and parses metadata', () => {
+  const md = `
+### လုပ်ဆောင်ရန်များ (Action Items)
+- [ ] Core API deploy လုပ်ရန် (တာဝန်ခံ: ကိုကျော်သူ, ရက်: အောက်တိုဘာ ၁၀, ဦးစားပေး: မြင့်)
+- [x] Client feedback စစ်ဆေးပြီး (တာဝန်ခံ: မနှင်းဝေ)
+`;
+
+  const items = DocumentExporter.extractActionItems(md);
+  assert.strictEqual(items.length, 2, 'Should extract 2 checklist items');
+  assert.strictEqual(items[0].task.includes('Core API deploy လုပ်ရန်'), true);
+  assert.strictEqual(items[0].owner, 'ကိုကျော်သူ');
+  assert.strictEqual(items[0].due, 'အောက်တိုဘာ ၁၀');
+  assert.strictEqual(items[0].priority, 'မြင့်');
+  assert.strictEqual(items[0].completed, false);
+  assert.strictEqual(items[1].completed, true);
+  assert.strictEqual(items[1].owner, 'မနှင်းဝေ');
+});
+
+test('DocumentExporter.extractActionItems extracts bullet points under Action Items sections', () => {
+  const md = `
+## အဓိက ဆုံးဖြတ်ချက်များ
+
+## နောက်ဆက်တွဲ လုပ်ဆောင်ရန် အစီအမံများ (Next Steps)
+* Server upgrade စရိတ် တင်ပြရန် - Assignee: Ko Kyaw Thu - Due: Oct 15
+* Marketing teaser လွှင့်တင်ရန် - Assignee: Ma Hnin Wai - Priority: High
+`;
+
+  const items = DocumentExporter.extractActionItems(md);
+  assert.strictEqual(items.length, 2, 'Should extract 2 bullet items under action heading');
+  assert.strictEqual(items[0].owner, 'Ko Kyaw Thu');
+  assert.strictEqual(items[0].due, 'Oct 15');
+  assert.strictEqual(items[1].owner, 'Ma Hnin Wai');
+  assert.strictEqual(items[1].priority, 'High');
+});

@@ -69,3 +69,11 @@ test('All AI modes generate specific Burmese instructions', () => {
     assert.ok(prompt.length > 300, `Prompt for ${m} should be detailed`);
   });
 });
+
+test('AudioEngine initializes onError and onSpeechTranscript callbacks correctly', () => {
+  const engine = new AudioEngine();
+  assert.strictEqual(engine.onError, null);
+  assert.strictEqual(engine.onSpeechTranscript, null);
+  assert.strictEqual(typeof engine.formatTime, 'function');
+  assert.strictEqual(typeof engine.formatBytes, 'function');
+});

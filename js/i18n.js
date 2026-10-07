@@ -82,6 +82,16 @@ const translations = {
     cancelBtn: "ပယ်ဖျက်မည်",
     bridgeActive: "Local Antigravity Bridge ချိတ်ဆက်မိနေပါသည်",
     bridgeInactive: "Local Bridge မရှိပါ (API Key သို့မဟုတ် Gemini Web ကို သုံးပါ)",
+    execModeLabel: "လုပ်ဆောင်မည့် နည်းလမ်း ရွေးချယ်ပါ:",
+    execModeAntigravity: "⚡ Antigravity / Gemini Web (API Key မလို - အကြံပြု)",
+    execModeApiKey: "🔑 Google AI Studio API Key (တိုက်ရိုက်)",
+    runViaBridgeBtn: "⚡ Local Bridge ဖြင့် ချက်ချင်း ထုတ်ယူမည်",
+    runViaGeminiWebBtn: "🌐 Gemini Web ဖြင့် ထုတ်ယူမည် (Prompt ကူးယူရန်)",
+    runViaApiKeyBtn: "🔑 API Key ဖြင့် တိုက်ရိုက် ထုတ်ယူမည်",
+    audioDecodeError: "ဤအသံဖိုင်ပုံစံကို Browser player မှ တိုက်ရိုက် မဖွင့်နိုင်ပါ။ သို့သော် Antigravity / Gemini Web တွင် မည်သည့် အသံဖိုင်မဆို တင်သွင်းနိုင်ပါသည်။",
+    speechDictationActive: "🎙️ မြန်မာစကားပြောကို တိုက်ရိုက် စာသားအဖြစ် ဖမ်းယူနေပါသည်...",
+    runBridgeNowBtn: "⚡ Current Meeting ကို Bridge ဖြင့် စမ်းသပ် run မည်",
+    bridgeRunningText: "Antigravity CLI (agy) မှ မှတ်တမ်း ရေးသားနေပါသည်...",
 
     // Result Viewer & Editor
     resultTitle: "ထွက်ရှိလာသော အစည်းအဝေး မှတ်တမ်း",
@@ -224,6 +234,16 @@ const translations = {
     cancelBtn: "Cancel",
     bridgeActive: "Local Antigravity CLI Bridge is connected",
     bridgeInactive: "Local Bridge offline (Use Free API Key or Gemini Web mode)",
+    execModeLabel: "Select Execution Method:",
+    execModeAntigravity: "⚡ Antigravity / Gemini Web (Zero API Key - Recommended)",
+    execModeApiKey: "🔑 Google AI Studio API Key (Direct)",
+    runViaBridgeBtn: "⚡ Run via Local CLI Bridge",
+    runViaGeminiWebBtn: "🌐 Run via Gemini Web (Copy Prompt Bundle)",
+    runViaApiKeyBtn: "🔑 Generate with API Key",
+    audioDecodeError: "Cannot decode this audio format in browser player. However, you can still upload it to Gemini Web!",
+    speechDictationActive: "🎙️ Real-time Burmese speech dictation active...",
+    runBridgeNowBtn: "⚡ Test Run Current Meeting with CLI Bridge",
+    bridgeRunningText: "Antigravity CLI (agy) is generating meeting minutes...",
 
     // Result Viewer & Editor
     resultTitle: "Generated Meeting Minutes",

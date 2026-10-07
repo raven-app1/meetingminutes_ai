@@ -888,3 +888,10 @@ body {
     color: #000 !important;
   }
 }
+
+.active-method {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #fff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}

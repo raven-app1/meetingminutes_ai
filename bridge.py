@@ -85,7 +85,12 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
 
             # Execute agy CLI with -p prompt non-interactively
             try:
-                cmd = [agy, "-p", prompt]
+                cmd = [agy, "--dangerously-skip-permissions", "--effort", "low"]
+                model = data.get('model')
+                if model:
+                    cmd.extend(["--model", str(model)])
+                cmd.extend(["-p", prompt])
+
                 proc = subprocess.run(
                     cmd,
                     stdout=subprocess.PIPE,
@@ -94,19 +99,21 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
                     timeout=300
                 )
 
-                if proc.returncode != 0:
+                output_text = proc.stdout.strip()
+                if proc.returncode != 0 or "jetski: no output produced" in output_text:
+                    err_msg = proc.stderr.strip() or output_text or "CLI execution failed"
                     self.send_response(500)
                     self._send_cors_headers()
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({"error": f"CLI error: {proc.stderr}"}).encode('utf-8'))
+                    self.wfile.write(json.dumps({"error": f"CLI error: {err_msg}"}).encode('utf-8'))
                     return
 
                 self.send_response(200)
                 self._send_cors_headers()
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({"result": proc.stdout.strip()}).encode('utf-8'))
+                self.wfile.write(json.dumps({"result": output_text}).encode('utf-8'))
 
             except subprocess.TimeoutExpired:
                 self.send_response(504)

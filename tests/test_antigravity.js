@@ -27,3 +27,14 @@ test('AntigravityHelper checkBridgeHealth returns available:false when bridge is
   const health = await helper.checkBridgeHealth();
   assert.strictEqual(health.available, false);
 });
+
+test('AntigravityHelper includes transcriptText in prompt bundle when provided', () => {
+  const helper = new AntigravityHelper();
+  const bundle = helper.buildGeminiWebBundle({
+    mode: 'summary',
+    transcriptText: 'သဘာပတိ: မင်္ဂလာပါ အားလုံးပဲ'
+  });
+
+  assert.ok(bundle.fullBundle.includes('သဘာပတိ: မင်္ဂလာပါ အားလုံးပဲ'));
+  assert.ok(bundle.promptOnly.includes('MEETING TRANSCRIPT / SPOKEN NOTES:'));
+});

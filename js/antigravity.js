@@ -50,16 +50,24 @@ class AntigravityHelper {
    * where users with Antigravity / Gemini Advanced subscriptions can upload their audio file directly!
    */
   buildGeminiWebBundle(options = {}) {
-    const prompt = typeof buildGeminiPrompt === 'function'
+    let prompt = typeof buildGeminiPrompt === 'function'
       ? buildGeminiPrompt(options)
       : "Please transcribe and generate meeting minutes from this Burmese audio recording.";
+
+    if (options.transcriptText && options.transcriptText.trim()) {
+      prompt = `MEETING TRANSCRIPT / SPOKEN NOTES:\n${options.transcriptText.trim()}\n\n${prompt}`;
+    }
+
+    const hasAudio = options.isAudioInput !== false && !options.transcriptText;
+    const stepAttach = hasAudio
+      ? "2. In the chat box, click the '+' or paperclip icon and attach your meeting audio file.\n3. Paste the prompt below and press Enter."
+      : "2. Paste the prompt and meeting text below into the chat box and press Enter.";
 
     const instructions = `================================================================================
 📌 INSTRUCTIONS FOR GEMINI ADVANCED / ANTIGRAVITY SUBSCRIPTION USERS:
 ================================================================================
 1. Open https://gemini.google.com in your browser.
-2. In the chat box, click the '+' or paperclip icon and attach your meeting audio file.
-3. Paste the prompt below and press Enter.
+${stepAttach}
 4. Once Gemini responds, copy the text and paste it into this app's "Paste Result" box
    to get interactive Action Items, Word .doc download, and PDF printing!
 ================================================================================
