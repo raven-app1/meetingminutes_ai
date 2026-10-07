@@ -185,6 +185,10 @@ const translations = {
     btnSaveSettings: "သိမ်းဆည်းမည် (Save Settings)",
     btnCheckBridge: "ပြန်လည်စစ်ဆေးမည် 🔄",
     transcriptInputLabel: "သို့မဟုတ် စာသား/Transcript တိုက်ရိုက် ထည့်သွင်းရန်:",
+    transcriptInputPlaceholder: "အသံဖိုင် မရှိပါက အစည်းအဝေး ဆွေးနွေးချက် စာသားများကို ဤနေရာတွင် ရိုက်ထည့်နိုင်ပါသည်...",
+    modalPastePlaceholder: "Gemini မှ ထွက်ရှိလာသော စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ...",
+    rawMarkdownPlaceholder: "Markdown စာသားများကို ဤနေရာတွင် တိုက်ရိုက် ပြင်ဆင်ရေးသားနိုင်ပါသည်...",
+    loadSampleOutputBtn: "နမူနာ မှတ်တမ်း ရလဒ် တိုက်ရိုက်ကြည့်ရှုမည်",
     jumpToAgLink: "အသေးစိတ် လမ်းညွှန်ကြည့်ရန် ↗"
   },
 
@@ -369,6 +373,10 @@ const translations = {
     btnSaveSettings: "Save Settings",
     btnCheckBridge: "Re-check 🔄",
     transcriptInputLabel: "Or enter Meeting Notes / Spoken Transcript directly:",
+    transcriptInputPlaceholder: "If you do not have an audio file, type or paste meeting notes / transcript text here...",
+    modalPastePlaceholder: "Paste the generated meeting minutes text from Gemini Web here...",
+    rawMarkdownPlaceholder: "Edit the raw Markdown text directly here...",
+    loadSampleOutputBtn: "Preview Sample Output Directly",
     jumpToAgLink: "View Guide ↗"
   }
 };

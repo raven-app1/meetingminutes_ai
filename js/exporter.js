@@ -107,25 +107,12 @@ class DocumentExporter {
         continue;
       }
 
-      // Headings
-      if (line.startsWith('# ')) {
+      // Headings (# to ######)
+      const headingMatch = line.trim().match(/^(#{1,6})\s+(.*)$/);
+      if (headingMatch) {
         flushList();
-        html.push(`<h1 class="minutes-h1">${DocumentExporter.inlineFormat(line.slice(2))}</h1>`);
-        continue;
-      }
-      if (line.startsWith('## ')) {
-        flushList();
-        html.push(`<h2 class="minutes-h2">${DocumentExporter.inlineFormat(line.slice(3))}</h2>`);
-        continue;
-      }
-      if (line.startsWith('### ')) {
-        flushList();
-        html.push(`<h3 class="minutes-h3">${DocumentExporter.inlineFormat(line.slice(4))}</h3>`);
-        continue;
-      }
-      if (line.startsWith('#### ')) {
-        flushList();
-        html.push(`<h4 class="minutes-h4">${DocumentExporter.inlineFormat(line.slice(5))}</h4>`);
+        const level = headingMatch[1].length;
+        html.push(`<h${level} class="minutes-h${level}">${DocumentExporter.inlineFormat(headingMatch[2])}</h${level}>`);
         continue;
       }
 
@@ -136,8 +123,8 @@ class DocumentExporter {
         continue;
       }
 
-      // Task list item: - [ ] or - [x]
-      const taskMatch = line.match(/^(\s*)(?:[-*]|\d+\.)\s+\[([ xX])\]\s+(.*)/);
+      // Task list item: - [ ] or - [x] (supports -, *, +, numbers, Myanmar numerals)
+      const taskMatch = line.match(/^(\s*)(?:[-*+]|\d+[\.\)]|[၀-၉\u1040-\u1049]+[\.၊။\)\u104a\u104b])\s+\[([ xX])\]\s+(.*)/);
       if (taskMatch) {
         if (!inList || listType !== 'ul') {
           flushList();
@@ -146,8 +133,10 @@ class DocumentExporter {
           html.push('<ul class="minutes-task-list">');
         }
         const isIndented = taskMatch[1].length > 0;
-        const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
-        html.push(`<li class="task-item${isIndented ? ' sub-item' : ''}"><label><input type="checkbox" ${checked} class="task-checkbox" /> <span>${DocumentExporter.inlineFormat(taskMatch[3])}</span></label></li>`);
+        const isChecked = taskMatch[2].toLowerCase() === 'x';
+        const checkedAttr = isChecked ? 'checked' : '';
+        const completedClass = isChecked ? ' completed' : '';
+        html.push(`<li class="task-item${isIndented ? ' sub-item' : ''}${completedClass}"><label><input type="checkbox" ${checkedAttr} class="task-checkbox" /> <span>${DocumentExporter.inlineFormat(taskMatch[3])}</span></label></li>`);
         continue;
       }
 
@@ -165,8 +154,8 @@ class DocumentExporter {
         continue;
       }
 
-      // Numbered lists (1. 2.)
-      const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)/);
+      // Numbered lists (1. 2. or Myanmar numerals ၁. ၁။)
+      const numMatch = line.match(/^(\s*)(?:\d+[\.\)]|[၀-၉\u1040-\u1049]+[\.၊။\)\u104a\u104b])\s+(.*)/);
       if (numMatch) {
         if (!inList || listType !== 'ol') {
           flushList();
@@ -175,7 +164,7 @@ class DocumentExporter {
           html.push('<ol class="minutes-ordered-list">');
         }
         const isIndented = numMatch[1].length > 0;
-        html.push(`<li${isIndented ? ' class="sub-item"' : ''}>${DocumentExporter.inlineFormat(numMatch[3])}</li>`);
+        html.push(`<li${isIndented ? ' class="sub-item"' : ''}>${DocumentExporter.inlineFormat(numMatch[2])}</li>`);
         continue;
       }
 
@@ -252,26 +241,35 @@ class DocumentExporter {
       const trimmed = line.trim();
 
       // Check for section headings
-      if (/^#{1,4}\s+.*(လုပ်ဆောင်ရန်|တာဝန်|action item|next step|task|အစီအမံ)/i.test(trimmed)) {
+      if (/^#{1,4}\s+.*(လုပ်ဆောင်ရန်|တာဝန်|ဆောင်ရွက်|action item|next step|task|to-?do|အစီအမံ|follow-?up)/i.test(trimmed)) {
         inActionSection = true;
       } else if (/^#{1,4}\s+/.test(trimmed)) {
         inActionSection = false;
       }
 
       // Check for Table Headers
-      if (line.includes('|') && (line.includes('တာဝန်') || line.includes('အစီအမံ') || /action|task|to-?do/i.test(line))) {
+      const isTableLine = line.includes('|');
+      const hasActionKeyword = (
+        inActionSection ||
+        line.includes('တာဝန်') ||
+        line.includes('အစီအမံ') ||
+        line.includes('ဆောင်ရွက်') ||
+        /action|task|to-?do|assignee|owner|pic|deliverable|work/i.test(line)
+      );
+
+      if (isTableLine && hasActionKeyword && !inActionTable) {
         inActionTable = true;
         colIndices = { task: -1, owner: -1, due: -1, priority: -1 };
         const headers = line.split('|').map(h => h.trim().toLowerCase());
         headers.forEach((h, idx) => {
           if (!h) return;
-          if (/(တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|responsible|person)/i.test(h)) {
+          if (/(တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|ခန့်အပ်သူ|owner|assignee|pic|responsible|person|lead)/i.test(h)) {
             colIndices.owner = idx;
-          } else if (/(ရက်|ရက်စွဲ|သတ်မှတ်ရက်|due|deadline|date|timeline)/i.test(h)) {
+          } else if (/(ရက်|ရက်စွဲ|သတ်မှတ်ရက်|ပြီးစီးရမည့်ရက်|due|deadline|date|timeline|target)/i.test(h)) {
             colIndices.due = idx;
-          } else if (/(ဦးစားပေး|priority|level)/i.test(h)) {
+          } else if (/(ဦးစားပေး|အဆင့်|priority|level|urgency|severity)/i.test(h)) {
             colIndices.priority = idx;
-          } else if (/(လုပ်ဆောင်ရန်|အစီအမံ|လုပ်ငန်း|task|action|to-?do|agenda|အကြောင်းအရာ|ဆွေးနွေးချက်|အကြောင်း)/i.test(h) || (h.includes('တာဝန်') && !/(ခံ|ယူ|ရှိ|ကျ)/.test(h))) {
+          } else if (/(လုပ်ဆောင်ရန်|အစီအမံ|လုပ်ငန်း|ဆောင်ရွက်|task|action|to-?do|agenda|အကြောင်းအရာ|ဆွေးနွေးချက်|အကြောင်း|item|description|detail|activity|deliverable)/i.test(h) || (h.includes('တာဝန်') && !/(ခံ|ယူ|ရှိ|ကျ)/.test(h))) {
             colIndices.task = idx;
           }
         });
@@ -318,7 +316,7 @@ class DocumentExporter {
             priority = cells[4];
           }
 
-          if (task && !task.startsWith('---') && !/^(လုပ်ဆောင်ရန် တာဝန်|task|action item)$/i.test(task)) {
+          if (task && !task.startsWith('---') && !/^(လုပ်ဆောင်ရန် တာဝန်|task|action item|description|item|စဉ်|no\.?)$/i.test(task)) {
             items.push({
               id: 'task_' + items.length,
               task: task.replace(/[*_]/g, '').trim(),
@@ -334,8 +332,8 @@ class DocumentExporter {
         inActionTable = false;
       }
 
-      // Check for Checklist item: - [ ] or - [x]
-      const checklistMatch = line.match(/^(\s*)(?:[-*]|\d+\.)\s+\[([ xX])\]\s+(.*)/);
+      // Check for Checklist item: - [ ] or - [x] (supports -, *, +, numbers, Myanmar numerals)
+      const checklistMatch = line.match(/^(\s*)(?:[-*+]|\d+[\.\)]|[၀-၉\u1040-\u1049]+[\.၊။\)\u104a\u104b])\s+\[([ xX])\]\s+(.*)/);
       if (checklistMatch) {
         const isChecked = checklistMatch[2].toLowerCase() === 'x';
         const taskText = checklistMatch[3];
@@ -353,9 +351,9 @@ class DocumentExporter {
 
       // Check for bullet or numbered list inside Action Items section
       if (inActionSection) {
-        const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/);
+        const listMatch = line.match(/^(\s*)(?:[-*+]|\d+[\.\)]|[၀-၉\u1040-\u1049]+[\.၊။\)\u104a\u104b])\s+(.*)/);
         if (listMatch) {
-          const content = listMatch[3].trim();
+          const content = listMatch[2].trim();
           if (content && content.length > 3) {
             const parsed = DocumentExporter._parseTaskMeta(content);
             items.push({
@@ -385,7 +383,7 @@ class DocumentExporter {
         const m = clean.match(rx);
         if (m) {
           let val = m[1].trim();
-          val = val.replace(/\s+[-–—].*$/, '').replace(/[,;|()]+$/, '').trim();
+          val = val.replace(/\s+[-–—].*$/, '').replace(/[,;|()၊။]+$/, '').trim();
           clean = clean.replace(m[0], ' ');
           return val;
         }
@@ -394,23 +392,23 @@ class DocumentExporter {
     }
 
     owner = extractField([
-      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline|ဦးစားပေး|priority)|$))/i,
-      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic)\s*[:：\-]\s*([^,;|()]+)/i
+      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|ခန့်အပ်သူ|owner|assignee|pic|responsible|lead)\s*[:：\-]\s*([^,;|()၊။]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()၊။]|\s*(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|ပြီးစီးရမည့်ရက်|due|deadline|ဦးစားပေး|priority)|$))/i,
+      /(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|ခန့်အပ်သူ|owner|assignee|pic|responsible|lead)\s*[:：\-]\s*([^,;|()၊။]+)/i
     ]);
 
     due = extractField([
-      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|ဦးစားပေး|priority)|$))/i,
-      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)\s*[:：\-]\s*([^,;|()]+)/i
+      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|ပြီးစီးရမည့်ရက်|due|deadline|date|target)\s*[:：\-]\s*([^,;|()၊။]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()၊။]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|ခန့်အပ်သူ|owner|assignee|pic|ဦးစားပေး|priority)|$))/i,
+      /(?:သတ်မှတ်ရက်|ရက်စွဲ|ရက်|ပြီးစီးရမည့်ရက်|due|deadline|date|target)\s*[:：\-]\s*([^,;|()၊။]+)/i
     ]);
 
     priority = extractField([
-      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|owner|assignee|pic|သတ်မှတ်ရက်|ရက်စွဲ|ရက်|due|deadline)|$))/i,
-      /(?:ဦးစားပေး|priority)\s*[:：\-]\s*([^,;|()]+)/i
+      /(?:ဦးစားပေး|အဆင့်|priority|level|urgency)\s*[:：\-]\s*([^,;|()၊။]+?)(?=(?:\s+[-–—]\s+|\s*[,;|()၊။]|\s*(?:တာဝန်ခံ|တာဝန်ယူသူ|တာဝန်ရှိသူ|တာဝန်ကျသူ|ဆောင်ရွက်သူ|လုပ်ဆောင်သူ|ခန့်အပ်သူ|owner|assignee|pic|သတ်မှတ်ရက်|ရက်စွဲ|ရက်|ပြီးစီးရမည့်ရက်|due|deadline)|$))/i,
+      /(?:ဦးစားပေး|အဆင့်|priority|level|urgency)\s*[:：\-]\s*([^,;|()၊။]+)/i
     ]);
 
-    // Clean up leftover parentheses or dashes
+    // Clean up leftover parentheses or dashes or punctuation
     clean = clean.replace(/[()\[\]{}|]+/g, ' ').replace(/\s+[-–—]\s+/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    clean = clean.replace(/^[-–—:\s]+|[-–—:\s]+$/g, '');
+    clean = clean.replace(/^[-–—:,;၊။\s]+|[-–—:,;၊။\s]+$/g, '').trim();
 
     return {
       task: clean || text.replace(/[*_]/g, '').trim(),
@@ -520,8 +518,8 @@ class DocumentExporter {
    * Generates Markdown (.md) file download.
    */
   static downloadMarkdown(title, markdownContent) {
-    const filename = `${(title || 'Meeting_Minutes').replace(/[^a-zA-Z0-9_\u1000-\u109F]/g, '_')}.md`;
-    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
+    const filename = `${(title || 'Meeting_Minutes').replace(/[^a-zA-Z0-9_\u1000-\u109F]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || 'Meeting_Minutes'}.md`;
+    const blob = new Blob(['\ufeff', markdownContent], { type: 'text/markdown;charset=utf-8' });
     DocumentExporter._triggerDownload(blob, filename);
   }
 
@@ -529,13 +527,26 @@ class DocumentExporter {
    * Generates Plain Text (.txt) file download.
    */
   static downloadPlainText(title, markdownContent) {
-    const filename = `${(title || 'Meeting_Minutes').replace(/[^a-zA-Z0-9_\u1000-\u109F]/g, '_')}.txt`;
-    // Clean markdown hashes and bold stars for pure clean text
-    const cleanText = markdownContent
-      .replace(/^#{1,6}\s+/gm, '')
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1');
-    const blob = new Blob([cleanText], { type: 'text/plain;charset=utf-8' });
+    const filename = `${(title || 'Meeting_Minutes').replace(/[^a-zA-Z0-9_\u1000-\u109F]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || 'Meeting_Minutes'}.txt`;
+    // Clean markdown formatting for pure clean text
+    const cleanText = (markdownContent || '')
+      .replace(/^#{1,6}\s+/gm, '') // headings
+      .replace(/\*\*\*(.*?)\*\*\*/g, '$1') // bold-italic
+      .replace(/\*\*(.*?)\*\*/g, '$1') // bold
+      .replace(/\*(.*?)\*/g, '$1') // italic
+      .replace(/___(.*?)___/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+      .replace(/~~(.*?)~~/g, '$1') // strikethrough
+      .replace(/`([^`]+)`/g, '$1') // inline code
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)') // links
+      .replace(/^\s*[-*+]\s+\[[ xX]\]\s+/gm, '• ') // task items
+      .replace(/^\s*[-*+]\s+/gm, '• ') // bullet items
+      .replace(/^[\s|:-]+$/gm, '') // remove markdown table separator lines like |---|---|
+      .replace(/\n{3,}/g, '\n\n') // normalize excessive newlines
+      .trim();
+
+    const blob = new Blob(['\ufeff', cleanText], { type: 'text/plain;charset=utf-8' });
     DocumentExporter._triggerDownload(blob, filename);
   }
 

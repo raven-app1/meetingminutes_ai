@@ -70,19 +70,26 @@ class AudioEngine {
    * Loads an audio File or Blob into the engine.
    */
   loadAudio(fileOrBlob) {
-    if (this.audioUrl) {
+    if (this.audioUrl && typeof URL !== 'undefined' && URL.revokeObjectURL) {
       URL.revokeObjectURL(this.audioUrl);
+      this.audioUrl = null;
     }
     this.currentBlob = fileOrBlob;
     if (fileOrBlob instanceof File) {
       this.currentFile = fileOrBlob;
-    } else {
+    } else if (typeof File !== 'undefined') {
       this.currentFile = new File([fileOrBlob], "recording.webm", { type: fileOrBlob.type || "audio/webm" });
+    } else {
+      this.currentFile = { name: "recording.webm", size: (fileOrBlob && fileOrBlob.size) || 0, type: (fileOrBlob && fileOrBlob.type) || "audio/webm" };
     }
 
-    this.audioUrl = URL.createObjectURL(fileOrBlob);
-    this.audioElement.src = this.audioUrl;
-    this.audioElement.playbackRate = 1.0;
+    if (typeof URL !== 'undefined' && URL.createObjectURL && typeof Blob !== 'undefined' && fileOrBlob instanceof Blob) {
+      this.audioUrl = URL.createObjectURL(fileOrBlob);
+    }
+    if (this.audioElement) {
+      this.audioElement.src = this.audioUrl || '';
+      this.audioElement.playbackRate = 1.0;
+    }
     return {
       name: this.currentFile.name,
       size: this.currentFile.size,
@@ -92,6 +99,7 @@ class AudioEngine {
   }
 
   play() {
+    if (!this.audioElement) return Promise.resolve();
     return this.audioElement.play();
   }
 
@@ -103,7 +111,7 @@ class AudioEngine {
 
   clearAudio() {
     this.pause();
-    if (this.audioUrl) {
+    if (this.audioUrl && typeof URL !== 'undefined' && URL.revokeObjectURL) {
       URL.revokeObjectURL(this.audioUrl);
       this.audioUrl = null;
     }
@@ -115,6 +123,7 @@ class AudioEngine {
   }
 
   togglePlay() {
+    if (!this.audioElement) return Promise.resolve(false);
     if (this.audioElement.paused) {
       return this.play().then(() => true);
     } else {
@@ -124,27 +133,29 @@ class AudioEngine {
   }
 
   seek(seconds) {
-    if (isFinite(seconds) && seconds >= 0) {
+    if (this.audioElement && isFinite(seconds) && seconds >= 0) {
       this.audioElement.currentTime = seconds;
     }
   }
 
   seekToProgress(fraction) {
-    if (this.audioElement.duration) {
+    if (this.audioElement && this.audioElement.duration) {
       this.seek(fraction * this.audioElement.duration);
     }
   }
 
   setPlaybackRate(rate) {
-    this.audioElement.playbackRate = rate;
+    if (this.audioElement) {
+      this.audioElement.playbackRate = rate;
+    }
   }
 
   getDuration() {
-    return this.audioElement.duration || 0;
+    return (this.audioElement && this.audioElement.duration) || 0;
   }
 
   getCurrentTime() {
-    return this.audioElement.currentTime || 0;
+    return (this.audioElement && this.audioElement.currentTime) || 0;
   }
 
   /**

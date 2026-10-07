@@ -136,15 +136,19 @@ class StorageManager {
   async getAllMeetings() {
     await this._initPromise;
     if (this.db) {
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction([STORE_MEETINGS], 'readonly');
-        const store = tx.objectStore(STORE_MEETINGS);
-        const req = store.getAll();
-        req.onsuccess = () => {
-          const sorted = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
-          resolve(sorted);
-        };
-        req.onerror = () => reject(req.error);
+      return new Promise((resolve) => {
+        try {
+          const tx = this.db.transaction([STORE_MEETINGS], 'readonly');
+          const store = tx.objectStore(STORE_MEETINGS);
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const sorted = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
+            resolve(sorted);
+          };
+          req.onerror = () => resolve(this.getSetting('history_fallback', []));
+        } catch (err) {
+          resolve(this.getSetting('history_fallback', []));
+        }
       });
     } else {
       return this.getSetting('history_fallback', []);
@@ -154,12 +158,20 @@ class StorageManager {
   async getMeetingById(id) {
     await this._initPromise;
     if (this.db) {
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction([STORE_MEETINGS], 'readonly');
-        const store = tx.objectStore(STORE_MEETINGS);
-        const req = store.get(id);
-        req.onsuccess = () => resolve(req.result || null);
-        req.onerror = () => reject(req.error);
+      return new Promise((resolve) => {
+        try {
+          const tx = this.db.transaction([STORE_MEETINGS], 'readonly');
+          const store = tx.objectStore(STORE_MEETINGS);
+          const req = store.get(id);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => {
+            const history = this.getSetting('history_fallback', []);
+            resolve(history.find(m => m.id === id) || null);
+          };
+        } catch (err) {
+          const history = this.getSetting('history_fallback', []);
+          resolve(history.find(m => m.id === id) || null);
+        }
       });
     } else {
       const history = this.getSetting('history_fallback', []);
@@ -169,34 +181,45 @@ class StorageManager {
 
   async deleteMeeting(id) {
     await this._initPromise;
+    // Always clean from fallback to keep in sync
+    let history = this.getSetting('history_fallback', []);
+    history = history.filter(m => m.id !== id);
+    this.setSetting('history_fallback', history);
+
     if (this.db) {
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
-        const store = tx.objectStore(STORE_MEETINGS);
-        const req = store.delete(id);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => reject(req.error);
+      return new Promise((resolve) => {
+        try {
+          const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
+          const store = tx.objectStore(STORE_MEETINGS);
+          const req = store.delete(id);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(true);
+        } catch (err) {
+          resolve(true);
+        }
       });
     } else {
-      let history = this.getSetting('history_fallback', []);
-      history = history.filter(m => m.id !== id);
-      this.setSetting('history_fallback', history);
       return true;
     }
   }
 
   async clearAllMeetings() {
     await this._initPromise;
+    this.setSetting('history_fallback', []);
+
     if (this.db) {
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
-        const store = tx.objectStore(STORE_MEETINGS);
-        const req = store.clear();
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => reject(req.error);
+      return new Promise((resolve) => {
+        try {
+          const tx = this.db.transaction([STORE_MEETINGS], 'readwrite');
+          const store = tx.objectStore(STORE_MEETINGS);
+          const req = store.clear();
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(true);
+        } catch (err) {
+          resolve(true);
+        }
       });
     } else {
-      this.setSetting('history_fallback', []);
       return true;
     }
   }

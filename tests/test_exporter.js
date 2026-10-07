@@ -148,3 +148,68 @@ test('DocumentExporter.markdownToHtml renders indented sub-bullets and groups co
   assert.ok(html.includes('<blockquote class="minutes-quote">Quote Line 1<br />Quote Line 2</blockquote>'), 'Should group consecutive quote lines');
   assert.ok(html.includes('<li class="sub-item">Sub-topic A</li>'), 'Sub-bullet should have sub-item class');
 });
+
+test('DocumentExporter.markdownToHtml renders Myanmar numerals and h1-h6 headings accurately', () => {
+  const md = `
+# အဆင့် ၁ ခေါင်းစဉ်
+## အဆင့် ၂ ခေါင်းစဉ်
+### အဆင့် ၃ ခေါင်းစဉ်
+#### အဆင့် ၄ ခေါင်းစဉ်
+
+၁။ ဆာဗာ စတင်ခြင်း
+၂။ ငွေစာရင်း စစ်ဆေးခြင်း
+၃. အပြီးသတ် အတည်ပြုခြင်း
+`;
+  const html = DocumentExporter.markdownToHtml(md);
+  assert.ok(html.includes('<h1 class="minutes-h1">အဆင့် ၁ ခေါင်းစဉ်</h1>'));
+  assert.ok(html.includes('<h4 class="minutes-h4">အဆင့် ၄ ခေါင်းစဉ်</h4>'));
+  assert.ok(html.includes('<ol class="minutes-ordered-list">'), 'Should render Myanmar numerals inside ordered list');
+  assert.ok(html.includes('<li>ဆာဗာ စတင်ခြင်း</li>'));
+  assert.ok(html.includes('<li>ငွေစာရင်း စစ်ဆေးခြင်း</li>'));
+  assert.ok(html.includes('<li>အပြီးသတ် အတည်ပြုခြင်း</li>'));
+});
+
+test('DocumentExporter.extractActionItems parses generic table headers under Action Items sections', () => {
+  const md = `
+## Action Items
+| No | Description | Assignee | Due Date |
+|---|---|---|---|
+| 1 | Deploy web app to Netlify | Kyaw Kyaw | Tomorrow |
+| 2 | Write documentation | Thiri | Friday |
+`;
+  const items = DocumentExporter.extractActionItems(md);
+  assert.strictEqual(items.length, 2, 'Should extract 2 items under generic action table headers');
+  assert.strictEqual(items[0].task, 'Deploy web app to Netlify');
+  assert.strictEqual(items[0].owner, 'Kyaw Kyaw');
+  assert.strictEqual(items[0].due, 'Tomorrow');
+  assert.strictEqual(items[1].task, 'Write documentation');
+  assert.strictEqual(items[1].owner, 'Thiri');
+});
+
+test('DocumentExporter.extractActionItems parses Myanmar numbered lists with assignee metadata', () => {
+  const md = `
+## လုပ်ဆောင်ရန်များ (Next Steps)
+၁။ Cloud Server Upgrade စတင်ရန် (တာဝန်ခံ: ကိုကျော်သူ, သတ်မှတ်ရက်: အောက်တိုဘာ ၉)
+၂။ Payment Terms ညှိနှိုင်းရန် (တာဝန်ခံ: ဒေါ်နွယ်နွယ်)
+`;
+  const items = DocumentExporter.extractActionItems(md);
+  assert.strictEqual(items.length, 2, 'Should extract 2 Myanmar numbered list items');
+  assert.strictEqual(items[0].task, 'Cloud Server Upgrade စတင်ရန်');
+  assert.strictEqual(items[0].owner, 'ကိုကျော်သူ');
+  assert.strictEqual(items[0].due, 'အောက်တိုဘာ ၉');
+  assert.strictEqual(items[1].task, 'Payment Terms ညှိနှိုင်းရန်');
+  assert.strictEqual(items[1].owner, 'ဒေါ်နွယ်နွယ်');
+});
+
+test('DocumentExporter._parseTaskMeta eliminates trailing punctuation and stray commas', () => {
+  const parsed1 = DocumentExporter._parseTaskMeta('Finalize budget (တာဝန်ခံ: Daw Nilar, ရက်: မနက်ဖြန်)');
+  assert.strictEqual(parsed1.task, 'Finalize budget', 'Should not leave stray trailing comma');
+  assert.strictEqual(parsed1.owner, 'Daw Nilar');
+  assert.strictEqual(parsed1.due, 'မနက်ဖြန်');
+
+  const parsed2 = DocumentExporter._parseTaskMeta('System deployment - Assignee: Ko Aung - Priority: High');
+  assert.strictEqual(parsed2.task, 'System deployment');
+  assert.strictEqual(parsed2.owner, 'Ko Aung');
+  assert.strictEqual(parsed2.priority, 'High');
+});
+

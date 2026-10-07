@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     recordHint: document.getElementById('recordHint'),
     // Sample & Transcript
     loadSampleBtn: document.getElementById('loadSampleBtn'),
+    loadSampleOutputBtn: document.getElementById('loadSampleOutputBtn'),
     transcriptTextInput: document.getElementById('transcriptTextInput'),
     // Settings & Modes
     meetingTitleInput: document.getElementById('meetingTitleInput'),
@@ -211,8 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.meetingTitleInput.placeholder = dict.meetingTitlePlaceholder;
     elements.customPromptInput.placeholder = dict.customPromptPlaceholder;
     elements.apiKeyInput.placeholder = dict.apiKeyPlaceholder;
+    if (elements.settingsApiKeyInput) elements.settingsApiKeyInput.placeholder = dict.apiKeyPlaceholder;
     elements.historySearchInput.placeholder = dict.historySearchPlaceholder;
     elements.agPasteResultInput.placeholder = dict.pasteBackPlaceholder;
+    if (elements.transcriptTextInput && dict.transcriptInputPlaceholder) {
+      elements.transcriptTextInput.placeholder = dict.transcriptInputPlaceholder;
+    }
+    if (elements.modalPasteInput && dict.modalPastePlaceholder) {
+      elements.modalPasteInput.placeholder = dict.modalPastePlaceholder;
+    }
+    if (elements.rawMarkdownEditor && dict.rawMarkdownPlaceholder) {
+      elements.rawMarkdownEditor.placeholder = dict.rawMarkdownPlaceholder;
+    }
 
     // Language select options
     const optBilingual = document.getElementById('opt-langBilingual');
@@ -421,13 +432,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Antigravity Tab: Copy Prompt
     elements.btnCopyAgPrompt.addEventListener('click', async () => {
+      const textInput = elements.transcriptTextInput ? elements.transcriptTextInput.value.trim() : '';
       const promptBundle = agHelper.buildGeminiWebBundle({
         mode: state.selectedMode,
         language: state.selectedOutputLang,
         uiLang: state.currentLang,
         meetingTitle: elements.meetingTitleInput.value.trim(),
         customPrompt: elements.customPromptInput.value.trim(),
-        isAudioInput: true
+        transcriptText: textInput,
+        isAudioInput: !!state.currentAudioBlob || !textInput
       });
       await DocumentExporter.copyToClipboard(promptBundle.fullBundle);
       showToast(state.currentLang === 'my' ? 'Prompt အားလုံးကို Copy ကူးယူပြီးပါပြီ! Gemini Web တွင် Paste လုပ်ပါ' : 'Prompt bundle copied! Paste into Gemini Web');
@@ -667,6 +680,17 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.transcriptTextInput.value = SAMPLE_MEETING.rawTranscript;
       showToast(state.currentLang === 'my' ? 'နမူနာ အစည်းအဝေး အသံဖိုင်နှင့် စာသားများ ထည့်သွင်းပြီးပါပြီ!' : 'Sample meeting loaded successfully!');
     });
+
+    if (elements.loadSampleOutputBtn) {
+      elements.loadSampleOutputBtn.addEventListener('click', () => {
+        const sampleOutput = (SAMPLE_MEETING.sampleOutputs && SAMPLE_MEETING.sampleOutputs[state.selectedMode]) || (SAMPLE_MEETING.sampleOutputs && SAMPLE_MEETING.sampleOutputs.summary);
+        elements.meetingTitleInput.value = state.currentLang === 'my' ? SAMPLE_MEETING.title : SAMPLE_MEETING.titleEn;
+        if (sampleOutput) {
+          setGeneratedResult(sampleOutput);
+          showToast(state.currentLang === 'my' ? 'နမူနာ အစည်းအဝေး ရလဒ်ကို ဖွင့်ပြထားပါသည်!' : 'Sample meeting minutes loaded!');
+        }
+      });
+    }
   }
 
   function handleFileSelected(fileOrBlob, defaultName = "audio.mp3") {
@@ -928,6 +952,18 @@ document.addEventListener('DOMContentLoaded', () => {
     state.rawMarkdownResult = markdown;
     elements.rawMarkdownEditor.value = markdown;
     state.currentMeetingId = null; // New record
+
+    // Auto-extract title from top heading if user left meeting title input blank
+    if (elements.meetingTitleInput && !elements.meetingTitleInput.value.trim() && markdown) {
+      const headingMatch = markdown.match(/^#+\s+(.+)$/m);
+      if (headingMatch) {
+        const cleanTitle = headingMatch[1].replace(/[*_#]/g, '').trim();
+        if (cleanTitle) {
+          elements.meetingTitleInput.value = cleanTitle;
+        }
+      }
+    }
+
     updateResultViews();
   }
 
@@ -937,6 +973,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Formatted HTML
     const html = DocumentExporter.markdownToHtml(md);
     elements.resultFormattedView.innerHTML = html;
+
+    // Wire up interactive task checkboxes in formatted view
+    elements.resultFormattedView.querySelectorAll('.task-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const li = cb.closest('.task-item');
+        if (li) {
+          li.classList.toggle('completed', cb.checked);
+        }
+      });
+    });
 
     // 2. Action Items
     const items = DocumentExporter.extractActionItems(md);
@@ -962,6 +1008,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = document.createElement('ul');
     list.className = 'minutes-task-list';
 
+    const ownerLabel = state.currentLang === 'my' ? 'တာဝန်ခံ' : 'Owner';
+    const dueLabel = state.currentLang === 'my' ? 'ရက်' : 'Due';
+    const priorityLabel = state.currentLang === 'my' ? 'ဦးစားပေး' : 'Priority';
+
     items.forEach((item, idx) => {
       if (item.completed) completedCount++;
 
@@ -980,8 +1030,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTaskStats(items);
       });
 
+      const priorityBadge = (item.priority && item.priority !== '-')
+        ? ` &bull; <small style="color:#f59e0b;">${priorityLabel}: ${escapeHtml(item.priority)}</small>`
+        : '';
+
       const span = document.createElement('span');
-      span.innerHTML = `<strong>${item.task}</strong> &bull; <small style="color:#38bdf8;">တာဝန်ခံ: ${item.owner}</small> &bull; <small style="color:#cbd5e1;">ရက်: ${item.due}</small>`;
+      // Escape HTML on item.task, item.owner, item.due to prevent XSS injection
+      span.innerHTML = `<strong>${escapeHtml(item.task)}</strong> &bull; <small style="color:#38bdf8;">${ownerLabel}: ${escapeHtml(item.owner)}</small> &bull; <small style="color:#cbd5e1;">${dueLabel}: ${escapeHtml(item.due)}</small>${priorityBadge}`;
 
       label.appendChild(checkbox);
       label.appendChild(span);

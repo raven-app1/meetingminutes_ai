@@ -33,4 +33,12 @@ test('StorageManager saveMeeting and getAllMeetings work with fallback', async (
 
   const delResult = await sm.deleteMeeting(saved.id);
   assert.strictEqual(delResult, true);
+
+  const afterDel = await sm.getMeetingById(saved.id);
+  assert.strictEqual(afterDel, null);
+
+  await sm.saveMeeting({ title: 'Meeting to clear' });
+  await sm.clearAllMeetings();
+  const cleared = await sm.getAllMeetings();
+  assert.strictEqual(cleared.length, 0);
 });

@@ -77,3 +77,21 @@ test('AudioEngine initializes onError and onSpeechTranscript callbacks correctly
   assert.strictEqual(typeof engine.formatTime, 'function');
   assert.strictEqual(typeof engine.formatBytes, 'function');
 });
+
+test('AudioEngine loadAudio, clearAudio, and controls operate safely in headless environment', async () => {
+  const engine = new AudioEngine();
+  const blob = createSyntheticDemoAudio();
+  const meta = engine.loadAudio(blob);
+  assert.ok(meta);
+  assert.ok(meta.size > 0);
+  assert.strictEqual(engine.getDuration(), 0);
+  assert.strictEqual(engine.getCurrentTime(), 0);
+
+  const isPlaying = await engine.togglePlay();
+  assert.strictEqual(isPlaying, false);
+
+  engine.clearAudio();
+  assert.strictEqual(engine.currentBlob, null);
+  assert.strictEqual(engine.currentFile, null);
+});
+
