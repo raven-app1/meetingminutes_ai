@@ -78,14 +78,30 @@ document.addEventListener('DOMContentLoaded', () => {
     btnModeApiKey: document.getElementById('btnModeApiKey'),
     execPanelAntigravity: document.getElementById('execPanelAntigravity'),
     execPanelApiKey: document.getElementById('execPanelApiKey'),
+    txtBackendlessBadge: document.getElementById('txt-backendlessBadge'),
+    bridgeStatusBox: document.getElementById('bridgeStatusBox'),
+    txtBridgeStatusLabel: document.getElementById('txt-bridgeStatusLabel'),
+    txtBridgeStatusDesc: document.getElementById('txt-bridgeStatusDesc'),
     bridgeStatusBadgeMini: document.getElementById('bridgeStatusBadgeMini'),
     btnQuickBridgeRun: document.getElementById('btnQuickBridgeRun'),
+    btnQuickPasteStudio: document.getElementById('btnQuickPasteStudio'),
     btnQuickGeminiWeb: document.getElementById('btnQuickGeminiWeb'),
     btnRunBridgeNow: document.getElementById('btnRunBridgeNow'),
     jumpToAntigravityLink: document.getElementById('jumpToAntigravityLink'),
     statusBanner: document.getElementById('statusBanner'),
     statusBannerTitle: document.getElementById('statusBannerTitle'),
     statusBannerDetail: document.getElementById('statusBannerDetail'),
+    btnOpenPasteModal: document.getElementById('btnOpenPasteModal'),
+    btnEmptyStatePaste: document.getElementById('btnEmptyStatePaste'),
+    pasteModal: document.getElementById('pasteModal'),
+    modalPasteInput: document.getElementById('modalPasteInput'),
+    btnClosePasteModal: document.getElementById('btnClosePasteModal'),
+    btnCancelModal: document.getElementById('btnCancelModal'),
+    btnSubmitModalPaste: document.getElementById('btnSubmitModalPaste'),
+    cloudNoticeBox: document.getElementById('cloudNoticeBox'),
+    txtCloudNoticeTitle: document.getElementById('txt-cloudNoticeTitle'),
+    txtCloudNoticeDesc: document.getElementById('txt-cloudNoticeDesc'),
+    txtMethod2DevBadge: document.getElementById('txt-method2DevBadge'),
     // Result
     resultToolbar: document.querySelector('.result-toolbar'),
     resultTabs: document.querySelectorAll('.result-tab-btn'),
@@ -160,6 +176,35 @@ document.addEventListener('DOMContentLoaded', () => {
         el.textContent = dict[key];
       }
     });
+
+    // Check if running on remote / HTTPS host (e.g. Netlify deployment)
+    // and maintain cloud zero-dependency badges and titles
+    if (agHelper.isRemoteOrHttps()) {
+      if (elements.txtBackendlessBadge) {
+        elements.txtBackendlessBadge.textContent = dict.backendlessBadgeNetlify;
+      }
+      if (elements.bridgeStatusBadgeMini) {
+        elements.bridgeStatusBadgeMini.textContent = dict.cloudZeroDepBadge;
+      }
+      if (elements.bridgeStatusBadge) {
+        elements.bridgeStatusBadge.textContent = dict.bridgeStatusBadgeCloud;
+      }
+      if (elements.txtBridgeStatusLabel) {
+        elements.txtBridgeStatusLabel.textContent = dict.bridgeStatusModeLabel;
+      }
+      if (elements.txtBridgeStatusDesc) {
+        elements.txtBridgeStatusDesc.textContent = dict.cloudModeDesc;
+      }
+      if (elements.txtCloudNoticeTitle) {
+        elements.txtCloudNoticeTitle.textContent = dict.cloudNoticeTitle;
+      }
+      if (elements.txtCloudNoticeDesc) {
+        elements.txtCloudNoticeDesc.textContent = dict.cloudNoticeDesc;
+      }
+      if (elements.txtMethod2DevBadge) {
+        elements.txtMethod2DevBadge.textContent = dict.method2DevBadge;
+      }
+    }
 
     // Update placeholders and options
     elements.meetingTitleInput.placeholder = dict.meetingTitlePlaceholder;
@@ -322,27 +367,56 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(t('savedSuccess'));
     });
 
+    // Quick Paste Modal Listeners
+    if (elements.btnOpenPasteModal) {
+      elements.btnOpenPasteModal.addEventListener('click', openPasteModal);
+    }
+    if (elements.btnEmptyStatePaste) {
+      elements.btnEmptyStatePaste.addEventListener('click', openPasteModal);
+    }
+    if (elements.btnClosePasteModal) {
+      elements.btnClosePasteModal.addEventListener('click', closePasteModal);
+    }
+    if (elements.btnQuickPasteStudio) {
+      elements.btnQuickPasteStudio.addEventListener('click', openPasteModal);
+    }
+    if (elements.btnCancelModal) {
+      elements.btnCancelModal.addEventListener('click', closePasteModal);
+    }
+    if (elements.btnSubmitModalPaste) {
+      elements.btnSubmitModalPaste.addEventListener('click', handleSubmitModalPaste);
+    }
+    if (elements.pasteModal) {
+      elements.pasteModal.addEventListener('click', (e) => {
+        if (e.target === elements.pasteModal) {
+          closePasteModal();
+        }
+      });
+    }
+
     // Antigravity Tab: Copy Prompt
     elements.btnCopyAgPrompt.addEventListener('click', async () => {
       const promptBundle = agHelper.buildGeminiWebBundle({
         mode: state.selectedMode,
         language: state.selectedOutputLang,
+        uiLang: state.currentLang,
         meetingTitle: elements.meetingTitleInput.value.trim(),
         customPrompt: elements.customPromptInput.value.trim(),
         isAudioInput: true
       });
-      await navigator.clipboard.writeText(promptBundle.fullBundle);
+      await DocumentExporter.copyToClipboard(promptBundle.fullBundle);
       showToast(state.currentLang === 'my' ? 'Prompt အားလုံးကို Copy ကူးယူပြီးပါပြီ! Gemini Web တွင် Paste လုပ်ပါ' : 'Prompt bundle copied! Paste into Gemini Web');
     });
 
     // Antigravity Tab: Paste Back & Format
-    elements.btnFormatPasted.addEventListener('click', () => {
+    elements.btnFormatPasted.addEventListener('click', async () => {
       const text = elements.agPasteResultInput.value.trim();
       if (!text) {
         showToast(state.currentLang === 'my' ? 'ကျေးဇူးပြု၍ Gemini မှ အဖြေကို အရင် Paste လုပ်ပါ' : 'Please paste Gemini output first');
         return;
       }
       setGeneratedResult(text);
+      await saveCurrentMeetingToHistory();
       switchMainTab('studio');
       showToast(t('alertSuccessGenerated'));
     });
@@ -375,6 +449,39 @@ document.addEventListener('DOMContentLoaded', () => {
       storage.setSetting('model', model);
       showToast(state.currentLang === 'my' ? 'ချိန်ညှိချက်များ သိမ်းဆည်းပြီးပါပြီ' : 'Settings saved');
     });
+  }
+
+  // --- Quick Paste Modal Controllers ---
+  function openPasteModal() {
+    if (!elements.pasteModal) return;
+    elements.pasteModal.classList.remove('hidden');
+    if (elements.modalPasteInput) {
+      elements.modalPasteInput.value = '';
+      setTimeout(() => elements.modalPasteInput.focus(), 50);
+    }
+  }
+
+  function closePasteModal() {
+    if (!elements.pasteModal) return;
+    elements.pasteModal.classList.add('hidden');
+  }
+
+  async function handleSubmitModalPaste() {
+    const text = elements.modalPasteInput ? elements.modalPasteInput.value.trim() : '';
+    if (!text) {
+      alert(state.currentLang === 'my'
+        ? 'ကျေးဇူးပြု၍ Gemini မှ ထွက်ရှိလာသော စာသားကို Paste လုပ်ပေးပါ'
+        : 'Please paste the generated meeting minutes text.');
+      return;
+    }
+
+    setGeneratedResult(text);
+    await saveCurrentMeetingToHistory();
+    closePasteModal();
+    if (state.currentTab !== 'studio') {
+      switchMainTab('studio');
+    }
+    showToast(t('alertSuccessGenerated'));
   }
 
   function switchMainTab(tabId) {
@@ -614,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if CLI Bridge is active
     const health = await checkBridgeStatus();
-    if (health.available) {
+    if (!health.isRemote && health.available) {
       await runViaBridge(textInput);
     } else {
       await handleQuickGeminiWeb();
@@ -624,13 +731,18 @@ document.addEventListener('DOMContentLoaded', () => {
   async function handleQuickBridgeRun() {
     if (state.isGenerating) return;
 
+    const health = await checkBridgeStatus();
+    if (health.isRemote) {
+      alert(t('localBridgeDisabledRemote'));
+      return;
+    }
+
     const textInput = elements.transcriptTextInput.value.trim();
     if (!state.currentAudioBlob && !textInput) {
       alert(t('alertNoAudio'));
       return;
     }
 
-    const health = await checkBridgeStatus();
     if (!health.available) {
       alert(state.currentLang === 'my'
         ? 'Local Antigravity Bridge ချိတ်ဆက်မထားပါ။ ကျေးဇူးပြု၍ Terminal တွင် `python3 bridge.py` ကို run ပေးပါ (သို့မဟုတ် Gemini Web workflow ကို သုံးပါ)။'
@@ -691,6 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bundle = agHelper.buildGeminiWebBundle({
       mode: state.selectedMode,
       language: state.selectedOutputLang,
+      uiLang: state.currentLang,
       meetingTitle: elements.meetingTitleInput.value.trim(),
       customPrompt: elements.customPromptInput.value.trim(),
       transcriptText: textInput,
@@ -698,15 +811,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     try {
-      await navigator.clipboard.writeText(bundle.fullBundle);
+      await DocumentExporter.copyToClipboard(bundle.fullBundle);
     } catch (e) {
-      // clipboard fallback
+      // handled
     }
 
     switchMainTab('antigravity');
-    showToast(state.currentLang === 'my'
-      ? 'Gemini Web Prompt Bundle ကို Copy ကူးပြီးပါပြီ! Gemini Web တွင် အသံဖိုင်နှင့်အတူ Paste လုပ်ပါ'
-      : 'Gemini Web prompt bundle copied! Paste into Gemini Web with your audio file');
+    showToast(t('promptCopiedToast'));
   }
 
   /**
@@ -966,6 +1077,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Antigravity Bridge Status ---
   async function checkBridgeStatus() {
+    const isRemote = agHelper.isRemoteOrHttps();
+
+    if (isRemote) {
+      if (elements.bridgeStatusBadgeMini) {
+        elements.bridgeStatusBadgeMini.textContent = t('cloudZeroDepBadge');
+        elements.bridgeStatusBadgeMini.style.color = '#38bdf8';
+        elements.bridgeStatusBadgeMini.style.backgroundColor = 'rgba(2, 132, 199, 0.2)';
+      }
+      if (elements.bridgeStatusBadge) {
+        elements.bridgeStatusBadge.textContent = t('bridgeStatusBadgeCloud');
+        elements.bridgeStatusBadge.style.color = '#38bdf8';
+        elements.bridgeStatusBadge.style.backgroundColor = 'rgba(2, 132, 199, 0.2)';
+      }
+      if (elements.txtBackendlessBadge) {
+        elements.txtBackendlessBadge.textContent = t('backendlessBadgeNetlify');
+      }
+      if (elements.txtBridgeStatusLabel) {
+        elements.txtBridgeStatusLabel.textContent = t('bridgeStatusModeLabel');
+      }
+      if (elements.txtBridgeStatusDesc) {
+        elements.txtBridgeStatusDesc.textContent = t('cloudModeDesc');
+      }
+      if (elements.cloudNoticeBox) {
+        elements.cloudNoticeBox.classList.remove('hidden');
+      }
+      if (elements.txtCloudNoticeTitle) {
+        elements.txtCloudNoticeTitle.textContent = t('cloudNoticeTitle');
+      }
+      if (elements.txtCloudNoticeDesc) {
+        elements.txtCloudNoticeDesc.textContent = t('cloudNoticeDesc');
+      }
+      if (elements.txtMethod2DevBadge) {
+        elements.txtMethod2DevBadge.textContent = t('method2DevBadge');
+      }
+      if (elements.btnQuickBridgeRun) {
+        elements.btnQuickBridgeRun.classList.add('hidden');
+      }
+      if (elements.btnQuickPasteStudio) {
+        elements.btnQuickPasteStudio.classList.remove('hidden');
+      }
+      return {
+        available: false,
+        authenticated: false,
+        isRemote: true,
+        reason: 'remote_or_https'
+      };
+    }
+
+    if (elements.btnQuickBridgeRun) {
+      elements.btnQuickBridgeRun.classList.remove('hidden');
+    }
+    if (elements.btnQuickPasteStudio) {
+      elements.btnQuickPasteStudio.classList.add('hidden');
+    }
+
     const badges = [elements.bridgeStatusBadge, elements.bridgeStatusBadgeMini].filter(Boolean);
     badges.forEach(badge => {
       badge.textContent = state.currentLang === 'my' ? 'စစ်ဆေးနေပါသည်...' : 'Checking...';
@@ -973,6 +1139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const health = await agHelper.checkBridgeHealth();
+
     badges.forEach(badge => {
       if (health.available) {
         badge.textContent = state.currentLang === 'my' ? 'ချိတ်ဆက်မိပါသည် (Active)' : 'Connected (Active)';

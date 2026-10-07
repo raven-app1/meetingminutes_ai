@@ -153,7 +153,29 @@ const translations = {
     alertNoAudio: "ကျေးဇူးပြု၍ အသံဖိုင်တစ်ခု ရွေးချယ်ပါ သို့မဟုတ် စာသား ထည့်သွင်းပါ။",
     alertNoApiKey: "Google AI Studio API Key ထည့်သွင်းပေးပါ (သို့မဟုတ် Antigravity/Gemini Web အသုံးပြုနည်းကို ရွေးပါ)။",
     alertSuccessGenerated: "အစည်းအဝေး မှတ်တမ်း အောင်မြင်စွာ ထုတ်ယူပြီးပါပြီ!",
-    alertError: "အမှားအယွင်း ဖြစ်ပေါ်ခဲ့ပါသည်: "
+    alertError: "အမှားအယွင်း ဖြစ်ပေါ်ခဲ့ပါသည်: ",
+
+    // Netlify & Cloud Zero Dependency Mode
+    backendlessBadgeNetlify: "☁️ Netlify Ready (Browser သီးသန့်)",
+    cloudModeTitle: "☁️ Netlify / Static Cloud Mode",
+    cloudModeDesc: "Local Python server သို့မဟုတ် bridge.py မလိုဘဲ Browser အတွင်း၌သာ တိုက်ရိုက် ၁၀၀% အလုပ်လုပ်ပါသည်။",
+    pasteGeminiModalBtn: "📋 Gemini ရလဒ် ထည့်မည်",
+    pasteGeminiModalTitle: "Gemini Web မှ ရရှိသော စာသားကို Paste လုပ်ပါ",
+    pasteGeminiModalDesc: "Gemini Web (gemini.google.com) မှ ရရှိလာသော အစည်းအဝေး မှတ်တမ်း စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ...",
+    formatAndRenderBtn: "✨ မှတ်တမ်း ပြောင်းလဲမည်",
+    cloudZeroDepBadge: "Local ဆာဗာမလို (Static)",
+    bridgeStatusBadgeCloud: "Netlify Cloud ပုံစံ (Static)",
+    bridgeStatusLabel: "အခြေအနေ:",
+    bridgeStatusModeLabel: "စနစ်:",
+    cloudNoticeTitle: "Netlify Cloud ပုံစံ (Zero Local Dependency)",
+    cloudNoticeDesc: "သင်သည် ဤ app ကို Netlify / Cloud ပေါ်တွင် အသုံးပြုနေပါသည်။ နည်းလမ်း ၁ (Gemini Web) သို့မဟုတ် Free Google AI Studio API Key ဖြင့် ကွန်ပျူတာပေါ်တွင် မည်သည့် script/server မှ run စရာမလိုဘဲ ၁၀၀% အပြည့်အဝ အသုံးပြုနိုင်ပါသည်။",
+    localBridgeDisabledRemote: "Netlify သို့မဟုတ် Cloud ပေါ်တွင် Local Bridge ကို သုံးရန် မလိုပါ။ Gemini Web workflow (သို့မဟုတ် Free API Key) ဖြင့် Browser အတွင်း၌သာ Local dependency မလိုဘဲ ၁၀၀% အသုံးပြုနိုင်ပါသည်။",
+    emptyStatePaste: "Gemini Web မှ ရရှိသော စာသားကို တိုက်ရိုက် ထည့်သွင်းမည်",
+    cancelBtnModal: "မလုပ်တော့ပါ",
+    method2DevBadge: "(Local Development အတွက်သာ)",
+    quickPasteStudioBtn: "📋 ရလဒ် ထည့်မည်",
+    promptCopiedToast: "Gemini Web Prompt Bundle ကို Copy ကူးပြီးပါပြီ! Gemini Web တွင် အသံဖိုင်နှင့်အတူ Paste လုပ်ပါ",
+    openGeminiWebDirectBtn: "Gemini Web ဖွင့်မည် ↗"
   },
 
   en: {
@@ -305,7 +327,29 @@ const translations = {
     alertNoAudio: "Please provide an audio file or enter text first.",
     alertNoApiKey: "Please enter your Google AI Studio API Key (or use the Antigravity / Gemini Web mode).",
     alertSuccessGenerated: "Meeting minutes generated successfully!",
-    alertError: "An error occurred: "
+    alertError: "An error occurred: ",
+
+    // Netlify & Cloud Zero Dependency Mode
+    backendlessBadgeNetlify: "☁️ Netlify Ready (Pure Browser)",
+    cloudModeTitle: "☁️ Netlify / Static Cloud Mode",
+    cloudModeDesc: "Runs 100% in your browser without requiring local Python server or bridge.py.",
+    pasteGeminiModalBtn: "📋 Paste Gemini Result",
+    pasteGeminiModalTitle: "Paste Result from Gemini Web",
+    pasteGeminiModalDesc: "Paste the meeting minutes text copied from Gemini Web (gemini.google.com) or Antigravity here...",
+    formatAndRenderBtn: "✨ Format & Render Minutes",
+    cloudZeroDepBadge: "Zero Dependency (Static)",
+    bridgeStatusBadgeCloud: "Netlify Cloud Mode (Static)",
+    bridgeStatusLabel: "Status:",
+    bridgeStatusModeLabel: "Mode:",
+    cloudNoticeTitle: "Netlify Cloud Mode (Zero Local Dependency)",
+    cloudNoticeDesc: "You are running this app on Netlify / Cloud. Method 1 (Gemini Web) and Google AI Studio Free API Key work 100% client-side with zero local dependencies or servers!",
+    localBridgeDisabledRemote: "Local Bridge is not needed on Netlify. You can use the Gemini Web workflow (zero API key) or direct Free Google AI Studio API Key with zero local dependencies!",
+    emptyStatePaste: "Paste Meeting Minutes from Gemini Web Directly",
+    cancelBtnModal: "Cancel",
+    method2DevBadge: "(Local Development Only)",
+    quickPasteStudioBtn: "📋 Paste Result",
+    promptCopiedToast: "Gemini Web prompt bundle copied! Paste into Gemini Web with your audio file",
+    openGeminiWebDirectBtn: "Open Gemini Web ↗"
   }
 };
 

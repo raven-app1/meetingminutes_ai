@@ -56,12 +56,44 @@
    - Instant language switcher in the header between Burmese Unicode and English.
 
 ---
+## ☁️ Hosting on Netlify (Zero Local Dependencies)
 
-## 🚀 How to Run (စတင် အသုံးပြုနည်း)
+This web application is **100% pure client-side** (static HTML/CSS/JS). When hosted on Netlify, it runs **completely without backend servers or local Python dependencies** (`server.py` and `bridge.py` are NOT needed).
 
-### Option 1: Quick Start with Python (Recommended)
+### Deployment Option 1: Netlify Drag-and-Drop (Netlify Drop)
+1. Go to **[https://app.netlify.com/drop](https://app.netlify.com/drop)** in your browser.
+2. Drag and drop this entire project folder (`/root/meetingminutes`) onto the Netlify upload area.
+3. Your web app will be live globally in seconds with free SSL (`https://<your-site>.netlify.app`).
+
+### Deployment Option 2: Git Repository Deployment
+1. Push this directory to your GitHub / GitLab repository.
+2. Log in to [Netlify](https://app.netlify.com), click **Add new site** > **Import an existing project**.
+3. Select your repository.
+4. Netlify will automatically detect `netlify.toml`:
+   - **Publish directory**: `.`
+   - **Build command**: `npm run build` (or leave empty)
+5. Click **Deploy Site**.
+
+### Zero-Dependency Operation on Netlify:
+- **Automatic HTTPS / Remote Host Detection**: The application automatically detects that it is running on a remote HTTPS cloud domain (`*.netlify.app`). It skips connecting to `http://localhost:3001` to eliminate any Mixed Content browser warnings or timeouts.
+- **Option A - Gemini Web Workflow (Zero API Key / Antigravity Subscription)**:
+  1. Select your meeting audio/notes and AI format mode in the web app.
+  2. Click **"အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦"** or **"Gemini Web Prompt ကူးယူမည်"** (copies optimized Burmese prompt bundle).
+  3. Upload your audio to [gemini.google.com](https://gemini.google.com) with your Antigravity / Gemini Advanced account.
+  4. Copy Gemini's output and click the app's **"📋 Gemini ရလဒ် ထည့်မည်" (Paste Result)** button to render rich minutes, interactive task checklists, Word `.doc`, and PDF!
+- **Option B - Free Google AI Studio API Key**:
+  1. Paste a free key from [Google AI Studio](https://aistudio.google.com/app/apikey) directly into the app.
+  2. The browser makes direct client-side HTTPS calls to Gemini 2.5 Flash / 1.5 Flash.
+  3. The key is securely saved in your browser's `localStorage` and never leaves your device.
+
+---
+
+## 🚀 Local Development (Localhost)
+
+If you prefer to run locally on your computer:
+
+### Option 1: Quick Start with Python
 ```bash
-cd /root/meetingminutes
 python3 server.py
 ```
 Open **http://localhost:3000** in your browser.
@@ -74,25 +106,12 @@ npm start
 ### Option 3: Direct File Open
 You can also open `index.html` directly in any modern web browser (Chrome, Edge, Firefox, Safari).
 
----
-
-## ⚡ Using with Antigravity Subscription (No API Key)
-
-### Method A: Gemini Web Workflow (Browser-Only)
-1. Open the app at `http://localhost:3000`.
-2. Select your desired Meeting Title, Output Language, and AI Mode.
-3. Switch to the **Antigravity / Gemini Guide** tab and click **"Copy Optimized Burmese Prompt 📋"**.
-4. Open [Gemini Web](https://gemini.google.com) (where your Antigravity / Gemini Advanced subscription is active).
-5. Drag and drop your audio file into Gemini, paste the copied prompt, and press Enter.
-6. Copy Gemini's response and paste it into the **"Paste Generated Result Here"** box in the app.
-7. Click **"Format Minutes & Save ✨"** to instantly get interactive action items, Word download, and PDF printing!
-
-### Method B: Local Antigravity CLI Bridge (`bridge.py`)
-If you have the Antigravity CLI (`agy`) installed:
+### Optional: Local Antigravity CLI Bridge (`bridge.py`)
+If you are running locally and have the Antigravity CLI (`agy`) installed:
 ```bash
 python3 bridge.py
 ```
-The web app will automatically detect the bridge on port 3001 and allow running directly through your authenticated Antigravity subscription.
+When running on `localhost:3000`, the app detects the local bridge on port 3001 for seamless CLI execution.
 
 ---
 
@@ -107,16 +126,18 @@ or:
 node --test tests/run_all.js
 ```
 
-All 30 unit and integration tests verify:
-- AI modes and Burmese prompt generation
+All 37 unit and integration tests verify:
+- Netlify configuration (`netlify.toml`), SPA redirects, and security headers
+- `_redirects` and `_headers` compatibility for Netlify Drop
+- Remote host and HTTPS detection (preventing mixed content requests)
+- AI modes and Burmese prompt engineering
 - Bilingual i18n dictionary completeness (မြန်မာ & English parity)
-- Markdown to HTML parsing and table rendering
-- Myanmar substring collision handling in Action Items
-- Checklist and bullet-point action item extraction with assignee and deadline parsing
+- Markdown to HTML parsing and Myanmar table rendering
+- Interactive Action Items checklist extraction and assignee/deadline parsing
 - Gemini API payload construction and MIME normalization
 - StorageManager persistence with IndexedDB and fallback
-- Antigravity prompt bundle generation with transcript support and bridge health checks
-- Audio engine time, byte formatting, and Web Speech API dictation callbacks
+- Antigravity prompt bundle generation and Gemini Web workflows
+- Audio engine time, byte formatting, and synthetic audio generation
 - XSS prevention and script tag sanitization
 
 ---
@@ -125,21 +146,25 @@ All 30 unit and integration tests verify:
 
 ```
 /root/meetingminutes/
-├── index.html               # Main application interface
+├── netlify.toml             # Netlify deployment configuration, redirects, and headers
+├── _redirects               # Netlify Drop SPA routing rules
+├── _headers                 # Netlify Drop security and UTF-8 charset headers
+├── index.html               # Main application interface & Quick Paste modal
 ├── css/
-│   └── styles.css           # Styling, Myanmar fonts, and print stylesheet
+│   └── styles.css           # Styling, Myanmar typography, modals, and print stylesheet
 ├── js/
-│   ├── app.js               # Application coordinator and UI controller
+│   ├── app.js               # Application coordinator, Netlify cloud mode, and UI controller
 │   ├── audio.js             # Web Audio API engine, player, recorder, waveform
 │   ├── gemini.js            # Client-side Google Gemini Flash API client
 │   ├── modes.js             # 6 AI modes and Burmese prompt engineering
 │   ├── i18n.js              # Bilingual translations dictionary (မြန်မာ / English)
 │   ├── storage.js           # IndexedDB & LocalStorage history manager
 │   ├── exporter.js          # Word, Markdown, Text, PDF, and clipboard exporter
-│   ├── antigravity.js       # Antigravity subscription and CLI bridge helper
+│   ├── antigravity.js       # Antigravity subscription, remote detection, and CLI helper
 │   └── sample-data.js       # Sample Burmese meeting dataset & audio synth
 ├── tests/
 │   ├── run_all.js           # Test suite runner
+│   ├── test_netlify_and_remote.js # Netlify config & remote host tests
 │   ├── test_modes.js        # AI modes tests
 │   ├── test_i18n.js         # Translation tests
 │   ├── test_exporter.js     # Exporter & parser tests
@@ -147,8 +172,8 @@ All 30 unit and integration tests verify:
 │   ├── test_storage.js      # History storage tests
 │   ├── test_antigravity.js  # Antigravity helper tests
 │   └── test_audio_and_edge_cases.js # Audio & edge cases tests
-├── bridge.py                # Optional local Antigravity CLI bridge server
-├── server.py                # Lightweight Python HTTP static server
-├── package.json             # NPM scripts and project metadata
+├── bridge.py                # Optional local Antigravity CLI bridge server (for localhost only)
+├── server.py                # Lightweight Python HTTP static server (for localhost only)
+├── package.json             # NPM scripts (build, test, start) and metadata
 └── README.md                # Documentation (English & Burmese)
 ```

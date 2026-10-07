@@ -5,3 +5,4 @@ require('./test_gemini.js');
 require('./test_storage.js');
 require('./test_antigravity.js');
 require('./test_audio_and_edge_cases.js');
+require('./test_netlify_and_remote.js');

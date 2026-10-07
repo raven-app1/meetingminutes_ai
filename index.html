@@ -257,12 +257,12 @@
 
             <!-- Panel A: Antigravity / Zero Key View (Default) -->
             <div id="execPanelAntigravity">
-              <div style="background:rgba(15, 23, 42, 0.7); border:1px solid rgba(56, 189, 248, 0.2); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:0.85rem;">
+              <div id="bridgeStatusBox" style="background:rgba(15, 23, 42, 0.7); border:1px solid rgba(56, 189, 248, 0.2); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:0.85rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-                  <span style="font-size:0.8rem; color:var(--text-muted);">Bridge:</span>
+                  <span style="font-size:0.8rem; color:var(--text-muted);" id="txt-bridgeStatusLabel">Status:</span>
                   <span id="bridgeStatusBadgeMini" class="badge-tag">စစ်ဆေးနေပါသည်...</span>
                 </div>
-                <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;">
+                <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;" id="txt-bridgeStatusDesc">
                   Antigravity subscription ဖြင့် API Key မလိုဘဲ မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်။
                 </div>
               </div>
@@ -272,9 +272,12 @@
                 ✨ <span id="txt-generateBtn">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည် ✦</span>
               </button>
 
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
+              <div id="bridgeSubActionGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
                 <button id="btnQuickBridgeRun" type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; border-color:rgba(52, 211, 153, 0.4); color:#34d399; padding:0.4rem 0.3rem;">
                   ⚡ <span id="txt-runViaBridgeBtn">Local Bridge</span>
+                </button>
+                <button id="btnQuickPasteStudio" type="button" class="btn btn-accent btn-sm hidden" style="font-size:0.75rem; padding:0.4rem 0.3rem;">
+                  📋 <span id="txt-quickPasteStudioBtn">ရလဒ် ထည့်မည်</span>
                 </button>
                 <button id="btnQuickGeminiWeb" type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:0.4rem 0.3rem;">
                   🌐 <span id="txt-runViaGeminiWebBtn">Gemini Web</span>
@@ -335,8 +338,11 @@
                 </button>
               </div>
 
-              <!-- Export Buttons -->
+              <!-- Export & Input Buttons -->
               <div class="export-group">
+                <button id="btnOpenPasteModal" class="btn btn-accent btn-sm" title="Paste Gemini Result">
+                  📋 <span id="txt-pasteGeminiModalBtn">Gemini ရလဒ် ထည့်မည်</span>
+                </button>
                 <button id="btnCopyResult" class="btn btn-secondary btn-sm" title="Copy to Clipboard">
                   📋 <span id="txt-copyBtn">Copy ကူးမည်</span>
                 </button>
@@ -365,6 +371,11 @@
                   <p style="font-size:0.9rem; max-width:480px; margin:0 auto;">
                     ဘယ်ဘက်တွင် မြန်မာအသံဖိုင် ရွေးချယ်ပြီး လိုချင်သော ပုံစံ (အကျဉ်းချုပ်၊ အသေးစိတ် သို့မဟုတ် တာဝန်များ) ကို ရွေးချယ်ကာ "မှတ်တမ်း ထုတ်ယူမည်" ကို နှိပ်ပါ သို့မဟုတ် "နမူနာ အစည်းအဝေးဖိုင် ထည့်ပါ" ဖြင့် စမ်းသပ်ကြည့်နိုင်ပါသည်။
                   </p>
+                  <div style="margin-top:1.5rem;">
+                    <button id="btnEmptyStatePaste" class="btn btn-outline btn-sm" style="border-color:rgba(56, 189, 248, 0.4); color:#38bdf8;">
+                      📋 <span id="txt-emptyStatePaste">Gemini Web မှ ရရှိသော စာသားကို တိုက်ရိုက် ထည့်သွင်းမည်</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -447,10 +458,16 @@
         </div>
 
         <!-- Method 2: Local CLI Bridge -->
-        <div style="background-color:rgba(15, 23, 42, 0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem;">
-          <h3 style="font-size:1.15rem; color:#34d399; margin-bottom:1rem;" id="txt-agOption2Title">
-            နည်းလမ်း ၂ - Local Antigravity CLI Bridge (စက်တွင်း အလိုအလျောက်ချိတ်ဆက်မှု)
-          </h3>
+        <div style="background-color:rgba(15, 23, 42, 0.6); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem;" id="method2BridgeCard">
+          <div id="cloudNoticeBox" class="hidden" style="background:rgba(2, 132, 199, 0.15); border:1px solid rgba(56, 189, 248, 0.3); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.86rem; color:#e0f2fe;">
+            💡 <strong id="txt-cloudNoticeTitle">Netlify Cloud ပုံစံ (Zero Local Dependency):</strong> <span id="txt-cloudNoticeDesc">သင်သည် ဤ app ကို Netlify / Cloud ပေါ်တွင် အသုံးပြုနေပါသည်။ နည်းလမ်း ၁ (Gemini Web) သို့မဟုတ် Free Google AI Studio API Key ဖြင့် ကွန်ပျူတာပေါ်တွင် မည်သည့် script/server မှ run စရာမလိုဘဲ ၁၀၀% အပြည့်အဝ အသုံးပြုနိုင်ပါသည်။</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <h3 style="font-size:1.15rem; color:#34d399; margin:0;" id="txt-agOption2Title">
+              နည်းလမ်း ၂ - Local Antigravity CLI Bridge (စက်တွင်း အလိုအလျောက်ချိတ်ဆက်မှု)
+            </h3>
+            <span id="txt-method2DevBadge" class="badge-tag" style="background:rgba(148, 163, 184, 0.15); color:#94a3b8; font-size:0.75rem;">(Local Development အတွက်သာ)</span>
+          </div>
           <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:1rem;" id="txt-agOpt2Desc">
             သင့်ကွန်ပျူတာတွင် `agy` CLI ထည့်သွင်းထားပြီး Antigravity subscription ရှိပါက နောက်ခံ Bridge runner ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူပြီး မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်:
           </p>
@@ -551,6 +568,30 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- Quick Paste Modal for Gemini Output -->
+  <div id="pasteModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="txt-pasteGeminiModalTitle">📋 Gemini Web မှ ရရှိသော စာသားကို Paste လုပ်ပါ</h3>
+        <button id="btnClosePasteModal" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:0.75rem;" id="txt-pasteGeminiModalDesc">
+          Gemini Web (gemini.google.com) သို့မဟုတ် Antigravity မှ ရရှိလာသော အစည်းအဝေး မှတ်တမ်း စာသားများကို အောက်တွင် ထည့်သွင်းပြီး 'မှတ်တမ်း ပြောင်းလဲမည်' ကို နှိပ်ပါ:
+        </p>
+        <textarea id="modalPasteInput" class="textarea-box" rows="10" placeholder="Gemini မှ ထွက်ရှိလာသော စာသားများကို ဤနေရာသို့ Paste လုပ်ပါ..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelModal" class="btn btn-outline btn-sm">
+          <span id="txt-cancelBtnModal">မလုပ်တော့ပါ</span>
+        </button>
+        <button id="btnSubmitModalPaste" class="btn btn-accent btn-sm">
+          ✨ <span id="txt-formatAndRenderBtn">မှတ်တမ်း ပုံစံအဖြစ် ပြောင်းလဲမည်</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification element -->

@@ -4,6 +4,7 @@
   "description": "Client-side Burmese Meeting Minutes AI web app with Gemini AI and Antigravity subscription support",
   "main": "index.html",
   "scripts": {
+    "build": "echo 'Burmese Meeting Minutes AI: Static build ready for Netlify'",
     "start": "python3 server.py",
     "bridge": "python3 bridge.py",
     "test": "node --test tests/run_all.js"

@@ -1,0 +1,69 @@
+# ==============================================================================
+# Netlify Configuration for Burmese Meeting Minutes AI
+# Pure Client-Side Static Web Application (Zero Local Dependencies / No Backend)
+# ==============================================================================
+
+[build]
+  # Publish root directory containing index.html, css/, js/
+  publish = "."
+  # Build command (pure static assets, zero build step needed)
+  command = "echo 'Burmese Meeting Minutes AI: Pure static web app ready for Netlify deployment'"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ------------------------------------------------------------------------------
+# SPA & Direct Route Redirects
+# Ensures clean URL routing and prevents 404s on browser reloads
+# ------------------------------------------------------------------------------
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ------------------------------------------------------------------------------
+# Security, Performance & Charset Headers
+# ------------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+    [headers.values]
+      X-Frame-Options = "DENY"
+      X-XSS-Protection = "1; mode=block"
+      X-Content-Type-Options = "nosniff"
+      Referrer-Policy = "strict-origin-when-cross-origin"
+      # Browser microphone access is required for in-browser live recording of Burmese meetings
+      Permissions-Policy = "microphone=(self), camera=(), geolocation=()"
+
+# HTML pages - Ensure UTF-8 for Burmese (Myanmar Unicode) typography & font rendering
+[[headers]]
+  for = "/"
+    [headers.values]
+      Content-Type = "text/html; charset=utf-8"
+      Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+    [headers.values]
+      Content-Type = "text/html; charset=utf-8"
+      Cache-Control = "no-cache, no-store, must-revalidate"
+
+# CSS stylesheets
+[[headers]]
+  for = "/css/*"
+    [headers.values]
+      Content-Type = "text/css; charset=utf-8"
+      Cache-Control = "public, max-age=0, must-revalidate"
+
+# JavaScript modules
+[[headers]]
+  for = "/js/*"
+    [headers.values]
+      Content-Type = "application/javascript; charset=utf-8"
+      Cache-Control = "public, max-age=0, must-revalidate"
+
+# JSON configuration / data
+[[headers]]
+  for = "/*.json"
+    [headers.values]
+      Content-Type = "application/json; charset=utf-8"
+      Cache-Control = "no-cache"

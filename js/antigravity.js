@@ -2,25 +2,92 @@
  * Antigravity Subscription & Gemini Web Helper
  * Supports zero-API-key operation:
  * 1. Generating optimized prompts to use with Gemini Web (gemini.google.com)
- * 2. Connecting to optional local Antigravity CLI bridge (`python3 bridge.py`)
+ * 2. Pure static client-side operation when deployed to Netlify / Cloud (Zero Local Dependency)
+ * 3. Connecting to optional local Antigravity CLI bridge (`python3 bridge.py`) when running on localhost
  */
 
 const LOCAL_BRIDGE_URL = 'http://localhost:3001';
 
 class AntigravityHelper {
-  constructor() {
+  constructor(options = {}) {
     this.bridgeAvailable = false;
+    this.bridgeUrl = options.bridgeUrl || LOCAL_BRIDGE_URL;
+    this._forceRemote = typeof options.forceRemote === 'boolean' ? options.forceRemote : null;
+  }
+
+  /**
+   * Checks whether the application is running on a remote cloud host (e.g. Netlify)
+   * or over HTTPS, where local HTTP bridge (http://localhost:3001) is either
+   * blocked by browser Mixed Content security policy or non-existent.
+   */
+  isRemoteOrHttps() {
+    if (this._forceRemote !== null) {
+      return this._forceRemote;
+    }
+
+    if (typeof window === 'undefined' || !window.location) {
+      return false; // In Node.js testing environment
+    }
+
+    const { protocol, hostname } = window.location;
+
+    // HTTPS pages block insecure HTTP requests (Mixed Content)
+    if (protocol === 'https:') {
+      return true;
+    }
+
+    // Remote hosts (e.g. *.netlify.app, custom domains)
+    const isLocalhost =
+      protocol === 'file:' ||
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '[::1]' ||
+      hostname.endsWith('.local');
+
+    return !isLocalhost;
+  }
+
+  /**
+   * Returns diagnostic info about current deployment environment.
+   */
+  getDeploymentInfo() {
+    const isRemote = this.isRemoteOrHttps();
+    const loc = typeof window !== 'undefined' && window.location ? window.location : null;
+
+    return {
+      isRemote: isRemote,
+      isHttps: loc ? loc.protocol === 'https:' : false,
+      hostname: loc ? loc.hostname : 'localhost',
+      protocol: loc ? loc.protocol : 'http:',
+      zeroDependencyMode: isRemote,
+      recommendedMode: isRemote ? 'gemini_web_or_api' : 'bridge_or_web'
+    };
   }
 
   /**
    * Checks if local Antigravity CLI bridge is running.
+   * On remote / HTTPS hosts (like Netlify), automatically skips network check
+   * to eliminate Mixed Content console errors and latency.
    */
-  async checkBridgeHealth() {
+  async checkBridgeHealth(options = {}) {
+    const forceCheck = options && options.force === true;
+
+    // Skip checking local bridge when on remote host or HTTPS to prevent mixed content
+    if (!forceCheck && this.isRemoteOrHttps()) {
+      this.bridgeAvailable = false;
+      return {
+        available: false,
+        authenticated: false,
+        isRemote: true,
+        reason: 'remote_or_https'
+      };
+    }
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-      const res = await fetch(`${LOCAL_BRIDGE_URL}/api/health`, {
+      const res = await fetch(`${this.bridgeUrl}/api/health`, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -31,7 +98,8 @@ class AntigravityHelper {
         return {
           available: true,
           authenticated: !!data.authenticated,
-          agent: data.agent || 'agy'
+          agent: data.agent || 'agy',
+          isRemote: false
         };
       }
     } catch (e) {
@@ -41,7 +109,8 @@ class AntigravityHelper {
     this.bridgeAvailable = false;
     return {
       available: false,
-      authenticated: false
+      authenticated: false,
+      isRemote: false
     };
   }
 
@@ -59,20 +128,38 @@ class AntigravityHelper {
     }
 
     const hasAudio = options.isAudioInput !== false && !options.transcriptText;
-    const stepAttach = hasAudio
-      ? "2. In the chat box, click the '+' or paperclip icon and attach your meeting audio file.\n3. Paste the prompt below and press Enter."
-      : "2. Paste the prompt and meeting text below into the chat box and press Enter.";
+    const isBurmese = options.uiLang === 'my';
 
-    const instructions = `================================================================================
+    let headerBlock = "";
+    if (isBurmese) {
+      const stepAttach = hasAudio
+        ? "၂။ Chat box ရှိ '+' (Paperclip) ခလုတ်ကို နှိပ်ပြီး သင့် အစည်းအဝေး အသံဖိုင်ကို တင်ပါ (Upload Audio)။\n၃။ အောက်ပါ Prompt ကို Paste လုပ်ပြီး Enter နှိပ်ပါ။"
+        : "၂။ အောက်ပါ Prompt နှင့် အစည်းအဝေး အချက်အလက်များကို Chat box တွင် Paste လုပ်ပြီး Enter နှိပ်ပါ။";
+
+      headerBlock = `================================================================================
+📌 GEMINI ADVANCED / ANTIGRAVITY SUBSCRIPTION လမ်းညွှန် (INSTRUCTIONS):
+================================================================================
+၁။ Browser တွင် https://gemini.google.com ကို ဖွင့်ပါ။ (Open https://gemini.google.com)
+${stepAttach}
+၄။ Gemini မှ အဖြေထွက်လာပါက Copy ကူးယူပြီး ဤ App ၏ "Gemini ရလဒ် ထည့်မည် (Paste Result)"
+   ထဲသို့ ပြန်လည် Paste လုပ်ပါက Word (.doc), PDF နှင့် Interactive Action Items များကို ရရှိပါမည်!
+================================================================================`;
+    } else {
+      const stepAttach = hasAudio
+        ? "2. In the chat box, click the '+' or paperclip icon and attach your meeting audio file.\n3. Paste the prompt below and press Enter."
+        : "2. Paste the prompt and meeting text below into the chat box and press Enter.";
+
+      headerBlock = `================================================================================
 📌 INSTRUCTIONS FOR GEMINI ADVANCED / ANTIGRAVITY SUBSCRIPTION USERS:
 ================================================================================
 1. Open https://gemini.google.com in your browser.
 ${stepAttach}
 4. Once Gemini responds, copy the text and paste it into this app's "Paste Result" box
    to get interactive Action Items, Word .doc download, and PDF printing!
-================================================================================
+================================================================================`;
+    }
 
-${prompt}`;
+    const instructions = `${headerBlock}\n\n${prompt}`;
 
     return {
       promptOnly: prompt,
@@ -84,7 +171,14 @@ ${prompt}`;
    * Calls the local Antigravity CLI bridge to execute `agy -p` directly.
    */
   async executeViaLocalBridge(payload) {
-    const res = await fetch(`${LOCAL_BRIDGE_URL}/api/process`, {
+    if (this.isRemoteOrHttps()) {
+      throw new Error(
+        "Local Antigravity CLI Bridge is not available on remote/HTTPS deployments (such as Netlify). " +
+        "Please use the zero-dependency Gemini Web workflow (Antigravity subscription) or direct Google AI Studio Free API Key."
+      );
+    }
+
+    const res = await fetch(`${this.bridgeUrl}/api/process`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
