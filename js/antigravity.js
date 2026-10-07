@@ -98,7 +98,10 @@ class AntigravityHelper {
         return {
           available: true,
           authenticated: !!data.authenticated,
-          agent: data.agent || 'agy',
+          agent: data.agent || data.cli || 'agy',
+          cli: data.cli || data.agent || null,
+          version: data.version || null,
+          hints: data.hints || [],
           isRemote: false
         };
       }
@@ -165,6 +168,69 @@ ${stepAttach}
       promptOnly: prompt,
       fullBundle: instructions
     };
+  }
+
+  /**
+   * Builds the payload for the local bridge.
+   *
+   * Audio picked in the browser is sent as base64 so the bridge can hand the
+   * recording to the CLI as a real file (the CLI cannot read browser blobs).
+   *
+   * @param {Object} options
+   * @param {string} options.prompt - Crafted prompt text
+   * @param {Blob|File} [options.audioBlob] - Meeting recording
+   * @param {string} [options.audioName] - Original file name
+   * @param {string} [options.audioBase64] - Pre-encoded audio
+   * @param {string} [options.audioMimeType] - MIME type of the audio
+   * @param {string} [options.effort] - Optional CLI reasoning effort
+   * @returns {Promise<Object>} Bridge request payload
+   */
+  async buildCliPayload(options = {}) {
+    const payload = { prompt: options.prompt || '' };
+    if (options.effort) {
+      payload.effort = options.effort;
+    }
+
+    let base64 = options.audioBase64;
+    if (!base64 && options.audioBlob && typeof fileToBase64 === 'function') {
+      base64 = await fileToBase64(options.audioBlob);
+    }
+
+    if (base64) {
+      payload.audio = {
+        base64: base64,
+        mimeType: options.audioMimeType || (options.audioBlob && options.audioBlob.type) || 'audio/mp3',
+        fileName: options.audioName || (options.audioBlob && options.audioBlob.name) || 'meeting-recording.mp3'
+      };
+    }
+
+    return payload;
+  }
+
+  /**
+   * Runs a tiny live check of the local bridge (verifies the CLI is signed in).
+   */
+  async verifyBridge() {
+    if (this.isRemoteOrHttps()) {
+      return { available: false, authenticated: false, reason: 'remote_or_https' };
+    }
+
+    try {
+      const res = await fetch(`${this.bridgeUrl}/api/health?verify=1`);
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          available: true,
+          authenticated: !!data.authenticated,
+          detail: data.verifyDetail || '',
+          hints: data.hints || []
+        };
+      }
+    } catch (e) {
+      // bridge offline
+    }
+
+    return { available: false, authenticated: false, detail: 'Local bridge is not running.' };
   }
 
   /**

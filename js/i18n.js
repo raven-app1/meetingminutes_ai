@@ -92,6 +92,8 @@ const translations = {
     speechDictationActive: "🎙️ မြန်မာစကားပြောကို တိုက်ရိုက် စာသားအဖြစ် ဖမ်းယူနေပါသည်...",
     runBridgeNowBtn: "⚡ Current Meeting ကို Bridge ဖြင့် စမ်းသပ် run မည်",
     bridgeRunningText: "Antigravity CLI (agy) မှ မှတ်တမ်း ရေးသားနေပါသည်...",
+    bridgeUploadingAudioText: "အသံဖိုင်ကို Local Bridge သို့ ပို့ပြီး Antigravity CLI ဖြင့် မှတ်တမ်း ရေးသားနေပါသည်...",
+    bridgeSetupHelp: "Local Antigravity Bridge ချိတ်ဆက်မထားပါ။\n\n၁။ Antigravity CLI ထည့်ရန်:\n   curl -fsSL https://antigravity.google/cli/install.sh | bash\n၂။ Terminal တွင် `agy` ကို တစ်ခါ run ပြီး သင့် Antigravity subscription ဖြင့် လက်မှတ်ထိုးပါ (API Key မလိုပါ)\n၃။ `python3 bridge.py --check` ဖြင့် စစ်ဆေးပါ\n၄။ `python3 bridge.py` ဖြင့် Bridge ကို ဖွင့်ပါ\n\nအသံဖိုင် စာသားဖြင့် မရသေးပါက Gemini Web workflow (Gemini ရလဒ် ထည့်မည်) ကို သုံးနိုင်ပါသည်။",
 
     // Result Viewer & Editor
     resultTitle: "ထွက်ရှိလာသော အစည်းအဝေး မှတ်တမ်း",
@@ -126,7 +128,7 @@ const translations = {
     formatPastedBtn: "မှတ်တမ်း ပုံစံအဖြစ် ပြောင်းလဲပြီး သိမ်းဆည်းမည် ✨",
 
     agOption2Title: "နည်းလမ်း ၂ - Local Antigravity CLI Bridge (စက်တွင်း အလိုအလျောက်ချိတ်ဆက်မှု)",
-    agOpt2Desc: "သင့်ကွန်ပျူတာတွင် `agy` CLI ထည့်သွင်းထားပြီး Antigravity subscription ရှိပါက နောက်ခံ Bridge runner ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူပြီး မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်:",
+    agOpt2Desc: "သင့်ကွန်ပျူတာတွင် `agy` (Antigravity CLI) ထည့်သွင်းပြီး Antigravity subscription ဖြင့် တစ်ခါ လက်မှတ်ထိုးထားပါက (Gemini API Key လုံးဝ မလိုပါ) နောက်ခံ Bridge ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူနိုင်ပါသည်။ စာသား (Transcript) အတွက် အကောင်းဆုံးဖြစ်ပြီး အသံဖိုင်အတွက် Browser မှ အသံဖိုင်ကို CLI လုပ်ငန်းခွင် ဖိုင်တစ်ခုအဖြစ် ပေးပို့ပါသည် — CLI မှ အသံဖိုင်ကို ဖတ်မရပါက နည်းလမ်း ၁ (Gemini Web) ကို သုံးပါ:",
     agRunBridgeCommand: "Terminal တွင် ဤ command ကို run ပါ -",
     agBridgeStatusLabel: "Bridge ချိတ်ဆက်မှု အခြေအနေ:",
 
@@ -282,6 +284,8 @@ const translations = {
     speechDictationActive: "🎙️ Real-time Burmese speech dictation active...",
     runBridgeNowBtn: "⚡ Test Run Current Meeting with CLI Bridge",
     bridgeRunningText: "Antigravity CLI (agy) is generating meeting minutes...",
+    bridgeUploadingAudioText: "Uploading your recording to the local bridge and generating minutes with the Antigravity CLI...",
+    bridgeSetupHelp: "Local Antigravity Bridge is not reachable.\n\n1. Install the Antigravity CLI:\n   curl -fsSL https://antigravity.google/cli/install.sh | bash\n2. Run `agy` once in a terminal and sign in with your Antigravity subscription (no API key needed).\n3. Verify with: python3 bridge.py --check\n4. Start it with: python3 bridge.py\n\nIf the CLI cannot decode your audio, use the Gemini Web workflow (paste the result back) instead.",
 
     // Result Viewer & Editor
     resultTitle: "Generated Meeting Minutes",
@@ -316,7 +320,7 @@ const translations = {
     formatPastedBtn: "Format Minutes & Save ✨",
 
     agOption2Title: "Workflow 2: Local Antigravity CLI Bridge (`agy`)",
-    agOpt2Desc: "If you have the Antigravity CLI (`agy`) installed and authenticated on this machine, you can run our lightweight local bridge to process audio automatically without any manual copying:",
+    agOpt2Desc: "Install the Antigravity CLI (`agy`) and sign in once with your Antigravity subscription — no Gemini API key is ever needed. The lightweight local bridge then lets this web app call the CLI directly. It is ideal for text transcripts; for audio, the recording is handed to the CLI as a local file (if your CLI build cannot read audio, use Method 1 - Gemini Web):",
     agRunBridgeCommand: "Run this command in terminal:",
     agBridgeStatusLabel: "CLI Bridge Status:",
 

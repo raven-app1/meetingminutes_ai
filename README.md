@@ -14,7 +14,7 @@
 
 2. **Zero-API-Key / Antigravity Subscription Workflow (API Key မလိုဘဲ သုံးနိုင်သောစနစ်)**:
    - **Gemini Web / Antigravity Workflow**: For Antigravity and Gemini Advanced subscription holders. Generates optimized Burmese prompt packages with 1-click copy, instructions to upload audio directly to Gemini Web, and instant formatting upon pasting back.
-   - **Local Antigravity CLI Bridge (`bridge.py`)**: Seamlessly connects the browser to your local authenticated `agy` CLI binary (`/root/.local/bin/agy`), piping prompts and audio through your Antigravity subscription without needing an API key.
+   - **Local Antigravity CLI Bridge (`bridge.py`)**: Connects the browser to your locally authenticated `agy` CLI (Antigravity subscription), so minutes can be generated straight from the app without an API key. Transcripts work everywhere; browser audio is offered to the CLI as a local temp file (if your CLI build cannot decode audio, use the Gemini Web workflow).
 
 3. **Free Google AI Studio Direct Integration**:
    - Option to use a free Google AI Studio API Key (Flash 2.5 / 1.5).
@@ -106,12 +106,51 @@ npm start
 ### Option 3: Direct File Open
 You can also open `index.html` directly in any modern web browser (Chrome, Edge, Firefox, Safari).
 
-### Optional: Local Antigravity CLI Bridge (`bridge.py`)
-If you are running locally and have the Antigravity CLI (`agy`) installed:
+### 🔑 Use your Antigravity subscription (no Gemini API key)
+
+There are two zero-API-key paths in this app. **Neither one requires a Gemini API key.**
+
+#### Path A — Gemini Web workflow (works everywhere, including phones)
+1. In the app pick your mode/language, then press **🌐 Gemini Web** (or *Copy Prompt Bundle*).
+2. Open <https://gemini.google.com> in another tab and attach your meeting recording.
+3. Paste the copied prompt, send it, then paste Gemini's answer back into the app
+   (**📋 Gemini ရလဒ် ထည့်မည်**) to get formatted minutes, Word/PDF export and the action-item checklist.
+
+This is the only path that feeds **audio** to your subscription, because Gemini Web accepts audio uploads.
+
+#### Path B — Local Antigravity CLI bridge (`bridge.py`)
+Runs your locally signed-in `agy` CLI behind `http://localhost:3001`, so the app can generate
+minutes with your subscription directly (best for transcripts and text notes).
+
 ```bash
-python3 bridge.py
+# 1. Install the Antigravity CLI (macOS / Linux / Googlebook)
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+# 2. Sign in once, interactively — headless runs reuse these cached credentials
+agy
+
+# 3. Check the setup, then start the bridge
+python3 bridge.py --check     # binary path, version, sign-in test
+python3 bridge.py             # serves http://localhost:3001
 ```
-When running on `localhost:3000`, the app detects the local bridge on port 3001 for seamless CLI execution.
+
+The app is served on `localhost:3000` (`python3 server.py` / `npm start`), where it discovers the
+bridge automatically and shows **Connected (Active)** in *Antigravity / Zero Key → Method 2*.
+Press **⚡ Local Bridge** to generate. Invalid URL or missing CLI? The app tells you exactly which
+command to run.
+
+| Symptom | Meaning | Fix |
+| --- | --- | --- |
+| Badge shows **Disconnected (Offline)** | `bridge.py` is not running | Start it: `python3 bridge.py` |
+| Error mentions *not found* | `agy` is not installed | Run the install script above |
+| Error mentions *Authentication required* | The CLI has no cached sign-in | Run `agy` once and sign in with your subscription |
+| Error mentions the audio file | Your CLI build cannot decode audio | Use Path A (Gemini Web) for that recording |
+
+Notes: audio selected in the browser is written to a private temp folder that the CLI can read as a
+local file (removed automatically after each run); on HTTPS deployments such as Netlify the local
+bridge is disabled by the browser's mixed-content rules, so use Path A there. Environment overrides:
+`AGY_BIN`, `BRIDGE_PORT` (default `3001`), `BRIDGE_TIMEOUT` (default `600`), `BRIDGE_EFFORT`,
+`BRIDGE_MODEL`, `BRIDGE_PERMISSIVE=0`.
 
 ---
 
@@ -126,7 +165,7 @@ or:
 node --test tests/run_all.js
 ```
 
-All 37 unit and integration tests verify:
+All 63 unit and integration tests verify:
 - Netlify configuration (`netlify.toml`), SPA redirects, and security headers
 - `_redirects` and `_headers` compatibility for Netlify Drop
 - Remote host and HTTPS detection (preventing mixed content requests)

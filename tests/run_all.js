@@ -7,3 +7,4 @@ require('./test_antigravity.js');
 require('./test_audio_and_edge_cases.js');
 require('./test_netlify_and_remote.js');
 require('./test_mobile_view.js');
+require('./test_bridge_cli.js');

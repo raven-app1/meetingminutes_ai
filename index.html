@@ -487,8 +487,14 @@
           <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:1rem;" id="txt-agOpt2Desc">
             သင့်ကွန်ပျူတာတွင် `agy` CLI ထည့်သွင်းထားပြီး Antigravity subscription ရှိပါက နောက်ခံ Bridge runner ကို ဖွင့်ထားရုံဖြင့် ဤ Web App မှ CLI ကို တိုက်ရိုက်ခေါ်ယူပြီး မှတ်တမ်း ထုတ်ယူနိုင်ပါသည်:
           </p>
-          <div style="background:#0b1120; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-family:'JetBrains Mono', monospace; font-size:0.88rem; color:#38bdf8; margin-bottom:1rem;">
-            python3 bridge.py
+          <div class="bridge-command-block">
+            <div><span class="cmd-comment"># 1. Install the Antigravity CLI</span></div>
+            <div>curl -fsSL https://antigravity.google/cli/install.sh | bash</div>
+            <div><span class="cmd-comment"># 2. Sign in once with your subscription (no API key)</span></div>
+            <div>agy</div>
+            <div><span class="cmd-comment"># 3. Verify the sign-in, then start the bridge</span></div>
+            <div>python3 bridge.py --check</div>
+            <div>python3 bridge.py</div>
           </div>
           <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
             <span id="txt-agBridgeStatusLabel" style="font-size:0.88rem; color:var(--text-muted);">Bridge ချိတ်ဆက်မှု အခြေအနေ:</span>

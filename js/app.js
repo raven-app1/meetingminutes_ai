@@ -845,9 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!health.available) {
-      alert(state.currentLang === 'my'
-        ? 'Local Antigravity Bridge ချိတ်ဆက်မထားပါ။ ကျေးဇူးပြု၍ Terminal တွင် `python3 bridge.py` ကို run ပေးပါ (သို့မဟုတ် Gemini Web workflow ကို သုံးပါ)။'
-        : 'Local Antigravity Bridge is offline. Please run `python3 bridge.py` in your terminal or use the Gemini Web workflow.');
+      alert(t('bridgeSetupHelp'));
       return;
     }
 
@@ -874,14 +872,21 @@ document.addEventListener('DOMContentLoaded', () => {
         fullPrompt = `MEETING RECORDING FILE: ${state.currentAudioName}\n${prompt}`;
       }
 
-      elements.statusBannerDetail.textContent = state.currentLang === 'my'
-        ? 'Antigravity CLI (agy) သို့ ပေးပို့ပြီး မှတ်တမ်း ရေးသားနေပါသည်...'
-        : 'Executing prompt through authenticated Antigravity CLI...';
-
-      const generated = await agHelper.executeViaLocalBridge({
+      // Hand the recording to the bridge as a real file: the CLI reads it from
+      // its own working directory. The Gemini API model id is intentionally not
+      // forwarded — the CLI uses the model configured in your Antigravity login.
+      const payload = await agHelper.buildCliPayload({
         prompt: fullPrompt,
-        model: state.selectedModel
+        audioBlob: state.currentAudioBlob,
+        audioName: state.currentAudioName,
+        audioMimeType: state.currentAudioBlob ? state.currentAudioBlob.type : undefined
       });
+
+      elements.statusBannerDetail.textContent = payload.audio
+        ? t('bridgeUploadingAudioText')
+        : t('bridgeRunningText');
+
+      const generated = await agHelper.executeViaLocalBridge(payload);
 
       setGeneratedResult(generated);
       await saveCurrentMeetingToHistory();
