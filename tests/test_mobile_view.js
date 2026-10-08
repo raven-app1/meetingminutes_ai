@@ -128,3 +128,58 @@ test('antigravity workflow cards use a responsive padding class instead of inlin
     'Card padding must be reduced on phones'
   );
 });
+
+test('index.html contains studio step switcher bar and distinct step section cards', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+
+  assert.ok(html.includes('id="studioStepBar"'), 'Must include studioStepBar in DOM');
+  assert.ok(html.includes('class="studio-step-bar"'), 'Must include studio-step-bar class');
+  assert.ok(html.includes('class="studio-step-btn active"'), 'Must include active step button');
+  assert.ok(html.includes('id="stepCard1"'), 'Must include stepCard1 for Step 1 (Audio)');
+  assert.ok(html.includes('id="stepCard2"'), 'Must include stepCard2 for Step 2 (AI Mode)');
+  assert.ok(html.includes('id="stepCard3"'), 'Must include stepCard3 for Step 3 (Execution)');
+  assert.ok(html.includes('id="stepCard4"'), 'Must include stepCard4 for Step 4 (Results)');
+  assert.ok(html.includes('class="step-nav-row"'), 'Must include step-nav-row for Next/Prev buttons');
+  assert.ok(html.includes('id="btnNextToStep2"'), 'Must include Next button on Step 1');
+  assert.ok(html.includes('id="btnNextToStep3"'), 'Must include Next button on Step 2');
+  assert.ok(html.includes('id="btnBackToStep1"'), 'Must include Back button on Step 2');
+  assert.ok(html.includes('id="btnBackToStep2"'), 'Must include Back button on Step 3');
+});
+
+test('css/styles.css implements step-by-step display so each section displays once not with scroll', () => {
+  const css = fs.readFileSync(path.join(__dirname, '../css/styles.css'), 'utf8');
+  const compact = css.replace(/\s+/g, ' ');
+
+  assert.ok(compact.includes('.studio-step-bar {'), 'Must define studio-step-bar styles');
+  assert.ok(compact.includes('.studio-step-btn {'), 'Must define studio-step-btn styles');
+  assert.ok(
+    compact.includes('#tabContent-studio[data-step="1"] #stepCard2, #tabContent-studio[data-step="1"] #stepCard3, #tabContent-studio[data-step="1"] #stepCard4 { display: none !important; }'),
+    'Step 1 must hide Step 2, 3, and 4 on mobile so each section displays once'
+  );
+  assert.ok(
+    compact.includes('#tabContent-studio[data-step="2"] #stepCard1, #tabContent-studio[data-step="2"] #stepCard3, #tabContent-studio[data-step="2"] #stepCard4 { display: none !important; }'),
+    'Step 2 must hide Step 1, 3, and 4 on mobile'
+  );
+  assert.ok(
+    compact.includes('#tabContent-studio[data-step="3"] #stepCard1, #tabContent-studio[data-step="3"] #stepCard2, #tabContent-studio[data-step="3"] #stepCard4 { display: none !important; }'),
+    'Step 3 must hide Step 1, 2, and 4 on mobile'
+  );
+  assert.ok(
+    compact.includes('#tabContent-studio[data-step="4"] .sidebar-col, #tabContent-studio[data-step="4"] #stepCard1, #tabContent-studio[data-step="4"] #stepCard2, #tabContent-studio[data-step="4"] #stepCard3 { display: none !important; }'),
+    'Step 4 must hide sidebar on mobile so Result card displays cleanly once without scroll'
+  );
+});
+
+test('i18n includes studio step keys in Burmese and English', () => {
+  const stepKeys = [
+    'stepNav1', 'stepNav2', 'stepNav3', 'stepNav4',
+    'btnNextToStep2', 'btnNextToStep3', 'btnBackToStep1', 'btnBackToStep2', 'btnBackToStep3',
+    'btnGoToResult', 'btnNewAudioSession'
+  ];
+
+  stepKeys.forEach(k => {
+    assert.ok(translations.my[k], `Burmese translations must include ${k}`);
+    assert.ok(translations.en[k], `English translations must include ${k}`);
+  });
+});
+

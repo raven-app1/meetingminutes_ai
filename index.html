@@ -60,14 +60,36 @@
     </nav>
 
     <!-- TAB 1: STUDIO (Main Workspace) -->
-    <main id="tabContent-studio" class="tab-pane active">
+    <main id="tabContent-studio" class="tab-pane active" data-step="1">
+
+      <!-- Studio Step Bar (Section Switcher) -->
+      <nav class="studio-step-bar" role="tablist" aria-label="Studio Steps" id="studioStepBar">
+        <button type="button" class="studio-step-btn active" data-step="1" id="stepBtn-1" role="tab" aria-selected="true">
+          <span class="step-num">၁</span>
+          <span class="step-label" id="txt-stepNav1">အသံဖိုင်</span>
+        </button>
+        <button type="button" class="studio-step-btn" data-step="2" id="stepBtn-2" role="tab" aria-selected="false">
+          <span class="step-num">၂</span>
+          <span class="step-label" id="txt-stepNav2">ပုံစံရွေးရန်</span>
+        </button>
+        <button type="button" class="studio-step-btn" data-step="3" id="stepBtn-3" role="tab" aria-selected="false">
+          <span class="step-num">၃</span>
+          <span class="step-label" id="txt-stepNav3">ထုတ်ယူမည်</span>
+        </button>
+        <button type="button" class="studio-step-btn" data-step="4" id="stepBtn-4" role="tab" aria-selected="false">
+          <span class="step-num">၄</span>
+          <span class="step-label" id="txt-stepNav4">ရလဒ်</span>
+          <span class="step-dot hidden" id="stepResultDot"></span>
+        </button>
+      </nav>
+
       <div class="main-grid">
         
         <!-- Left Column: Audio Input & AI Options -->
         <aside class="sidebar-col">
           
           <!-- Card 1: Audio Input -->
-          <div class="card">
+          <div class="card" id="stepCard1">
             <div class="card-header">
               <h2><span id="txt-step1Title">အဆင့် ၁ - အစည်းအဝေး အသံဖိုင် ထည့်သွင်းခြင်း</span></h2>
               <button id="clearAudioBtn" class="btn btn-outline btn-sm hidden">
@@ -153,10 +175,18 @@
               </div>
             </div>
 
+            <!-- Step 1 Nav -->
+            <div class="step-nav-row">
+              <div></div>
+              <button type="button" class="btn btn-primary btn-sm btn-step-next" data-next-step="2" id="btnNextToStep2">
+                <span id="txt-btnNextToStep2">ရှေ့သို့ (ပုံစံရွေးရန်) ➔</span>
+              </button>
+            </div>
+
           </div>
 
           <!-- Card 2: AI Modes & Settings -->
-          <div class="card">
+          <div class="card" id="stepCard2">
             <div class="card-header">
               <h2><span id="txt-step2Title">အဆင့် ၂ - AI စနစ်နှင့် မှတ်တမ်းပုံစံ ရွေးချယ်ခြင်း</span></h2>
             </div>
@@ -242,10 +272,20 @@
               </div>
             </div>
 
+            <!-- Step 2 Nav -->
+            <div class="step-nav-row">
+              <button type="button" class="btn btn-outline btn-sm btn-step-prev" data-prev-step="1" id="btnBackToStep1">
+                <span id="txt-btnBackToStep1">⬅ နောက်သို့ (အသံဖိုင်)</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm btn-step-next" data-next-step="3" id="btnNextToStep3">
+                <span id="txt-btnNextToStep3">ရှေ့သို့ (ထုတ်ယူရန်) ➔</span>
+              </button>
+            </div>
+
           </div>
 
           <!-- Card 3: Execution Method -->
-          <div class="card">
+          <div class="card" id="stepCard3">
             <div class="card-header">
               <h2><span id="txt-step3Title">အဆင့် ၃ - မှတ်တမ်း ထုတ်ယူခြင်း</span></h2>
             </div>
@@ -318,12 +358,22 @@
               </button>
             </div>
 
+            <!-- Step 3 Nav -->
+            <div class="step-nav-row">
+              <button type="button" class="btn btn-outline btn-sm btn-step-prev" data-prev-step="2" id="btnBackToStep2">
+                <span id="txt-btnBackToStep2">⬅ နောက်သို့ (ပုံစံရွေးရန်)</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm btn-step-next hidden" id="btnGoToResult" data-next-step="4">
+                <span id="txt-btnGoToResult">ရလဒ်ကြည့်ရန် ➔</span>
+              </button>
+            </div>
+
           </div>
 
         </aside>
 
         <!-- Right Column: Results & Interactive Minutes Editor -->
-        <section class="main-content-col">
+        <section class="main-content-col" id="stepCard4">
           
           <!-- Generating Status Banner -->
           <div id="statusBanner" class="status-banner hidden">
@@ -337,6 +387,16 @@
           <!-- Result Container Card -->
           <div class="card" id="resultCard">
             
+            <!-- Step 4 Nav -->
+            <div class="step-nav-row step-nav-row-result">
+              <button type="button" class="btn btn-outline btn-sm btn-step-prev" data-prev-step="3" id="btnBackToStep3">
+                <span id="txt-btnBackToStep3">⬅ ချိန်ညှိချက်များသို့ ပြန်သွားမည်</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="btnNewAudioSession">
+                <span id="txt-btnNewAudioSession">🎙️ အသံဖိုင်အသစ် စတင်မည်</span>
+              </button>
+            </div>
+
             <div class="result-toolbar">
               <!-- View mode tabs -->
               <div class="result-tabs">

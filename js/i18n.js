@@ -18,6 +18,19 @@ const translations = {
     tabSettings: "ချိန်ညှိချက်များ",
     tabHelp: "လမ်းညွှန်",
 
+    // Studio Stepper & Navigation
+    stepNav1: "အသံဖိုင်",
+    stepNav2: "ပုံစံရွေးရန်",
+    stepNav3: "ထုတ်ယူမည်",
+    stepNav4: "ရလဒ်",
+    btnNextToStep2: "ရှေ့သို့ (ပုံစံရွေးရန်) ➔",
+    btnNextToStep3: "ရှေ့သို့ (ထုတ်ယူရန်) ➔",
+    btnBackToStep1: "⬅ နောက်သို့ (အသံဖိုင်)",
+    btnBackToStep2: "⬅ နောက်သို့ (ပုံစံရွေးရန်)",
+    btnBackToStep3: "⬅ ချိန်ညှိချက်များသို့ ပြန်သွားမည်",
+    btnGoToResult: "ရလဒ်ကြည့်ရန် ➔",
+    btnNewAudioSession: "🎙️ အသံဖိုင်အသစ် စတင်မည်",
+
     // Step 1: Audio Input
     step1Title: "အဆင့် ၁ - အစည်းအဝေး အသံဖိုင် ထည့်သွင်းခြင်း",
     audioUploadTab: "အသံဖိုင် တင်ရန်",
@@ -209,6 +222,19 @@ const translations = {
     tabHistory: "Meeting History",
     tabSettings: "Settings",
     tabHelp: "Help & FAQ",
+
+    // Studio Stepper & Navigation
+    stepNav1: "Audio",
+    stepNav2: "AI Mode",
+    stepNav3: "Generate",
+    stepNav4: "Result",
+    btnNextToStep2: "Next: AI Mode ➔",
+    btnNextToStep3: "Next: Generate ➔",
+    btnBackToStep1: "⬅ Back: Audio",
+    btnBackToStep2: "⬅ Back: AI Mode",
+    btnBackToStep3: "⬅ Back to Settings",
+    btnGoToResult: "View Result ➔",
+    btnNewAudioSession: "🎙️ New Audio Session",
 
     // Step 1: Audio Input
     step1Title: "Step 1: Meeting Audio Input",

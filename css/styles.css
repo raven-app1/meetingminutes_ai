@@ -214,6 +214,153 @@ button, input, select, textarea, .mode-option-card, .nav-tab-btn, .sub-tab-btn {
   .main-grid {
     grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
   }
+
+  /* Desktop Studio Step Display: Left column shows active step, Right shows Result */
+  #tabContent-studio[data-step="1"] #stepCard2,
+  #tabContent-studio[data-step="1"] #stepCard3 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="1"] #stepCard1 {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="2"] #stepCard1,
+  #tabContent-studio[data-step="2"] #stepCard3 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="2"] #stepCard2 {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="3"] #stepCard1,
+  #tabContent-studio[data-step="3"] #stepCard2 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="3"] #stepCard3 {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="4"] #stepCard1,
+  #tabContent-studio[data-step="4"] #stepCard2 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="4"] #stepCard3 {
+    display: block !important;
+  }
+  #tabContent-studio #stepCard4 {
+    display: block !important;
+  }
+}
+
+/* ==========================================================================
+   Studio Step Navigation Bar (Section Switcher)
+   ========================================================================== */
+.studio-step-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  background: var(--bg-card);
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.studio-step-btn {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+  position: relative;
+  touch-action: manipulation;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.studio-step-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.studio-step-btn.active {
+  background: var(--bg-card-hover);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+}
+
+.studio-step-btn.completed {
+  color: #34d399;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.studio-step-btn.active .step-num {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+}
+
+.studio-step-btn.completed .step-num {
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
+}
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+/* Step Navigation Rows */
+.step-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.step-nav-row-result {
+  margin-bottom: 1rem;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0.75rem;
+  border-top: none;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* Cards */
@@ -1258,6 +1405,47 @@ del {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+
+  /* Display each section once not with scroll on mobile */
+  #tabContent-studio[data-step="1"] #stepCard2,
+  #tabContent-studio[data-step="1"] #stepCard3,
+  #tabContent-studio[data-step="1"] #stepCard4 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="1"] #stepCard1,
+  #tabContent-studio[data-step="1"] .sidebar-col {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="2"] #stepCard1,
+  #tabContent-studio[data-step="2"] #stepCard3,
+  #tabContent-studio[data-step="2"] #stepCard4 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="2"] #stepCard2,
+  #tabContent-studio[data-step="2"] .sidebar-col {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="3"] #stepCard1,
+  #tabContent-studio[data-step="3"] #stepCard2,
+  #tabContent-studio[data-step="3"] #stepCard4 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="3"] #stepCard3,
+  #tabContent-studio[data-step="3"] .sidebar-col {
+    display: block !important;
+  }
+
+  #tabContent-studio[data-step="4"] .sidebar-col,
+  #tabContent-studio[data-step="4"] #stepCard1,
+  #tabContent-studio[data-step="4"] #stepCard2,
+  #tabContent-studio[data-step="4"] #stepCard3 {
+    display: none !important;
+  }
+  #tabContent-studio[data-step="4"] #stepCard4 {
+    display: block !important;
+  }
 }
 
 /* Mobile Landscape & Portrait (<= 768px) */
@@ -1915,6 +2103,17 @@ del {
   .result-tab-btn {
     font-size: 0.78rem;
     padding: 0.45rem 0.65rem;
+  }
+
+  .studio-step-btn {
+    font-size: 0.74rem;
+    padding: 0.35rem 0.25rem;
+  }
+
+  .step-num {
+    width: 18px;
+    height: 18px;
+    font-size: 0.68rem;
   }
 
   .export-group .btn {

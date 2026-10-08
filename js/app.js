@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = {
     currentLang: storage.getSetting('ui_lang', 'my'), // 'my' or 'en'
     currentTab: 'studio',
+    currentStudioStep: 1, // 1: Audio, 2: Mode, 3: Generate, 4: Result
     currentSubtab: 'upload',
     selectedMode: 'summary',
     selectedOutputLang: 'bilingual',
@@ -36,6 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation
     navTabs: document.querySelectorAll('.nav-tab-btn'),
     tabPanes: document.querySelectorAll('.tab-pane'),
+    // Studio Stepper
+    tabContentStudio: document.getElementById('tabContent-studio'),
+    studioStepBar: document.getElementById('studioStepBar'),
+    studioStepBtns: document.querySelectorAll('.studio-step-btn'),
+    stepCard1: document.getElementById('stepCard1'),
+    stepCard2: document.getElementById('stepCard2'),
+    stepCard3: document.getElementById('stepCard3'),
+    stepCard4: document.getElementById('stepCard4'),
+    stepResultDot: document.getElementById('stepResultDot'),
+    btnGoToResult: document.getElementById('btnGoToResult'),
+    btnNewAudioSession: document.getElementById('btnNewAudioSession'),
     // Subtabs
     subtabBtns: document.querySelectorAll('.sub-tab-btn'),
     subtabPanes: document.querySelectorAll('.subtab-pane'),
@@ -158,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bind event handlers
     setupEventListeners();
     setupAudioEvents();
+
+    // Initialize studio step
+    switchStudioStep(state.currentStudioStep);
 
     // Check local bridge status in background
     checkBridgeStatus();
@@ -501,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentTab !== 'studio' || !elements.resultCard) return;
         const resultOffset = elements.resultCard.offsetTop;
         const currentScroll = window.scrollY || window.pageYOffset;
-        if (currentScroll >= resultOffset - 120) {
+        if (state.currentStudioStep === 4 || currentScroll >= resultOffset - 120) {
           if (!isScrolledDown) {
             isScrolledDown = true;
             if (elements.mobileJumpIcon) elements.mobileJumpIcon.textContent = '⬆';
@@ -519,11 +534,47 @@ document.addEventListener('DOMContentLoaded', () => {
       window.addEventListener('scroll', updateJumpBtnState, { passive: true });
 
       elements.mobileQuickJumpBtn.addEventListener('click', () => {
-        if (isScrolledDown) {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (elements.resultCard) {
-          elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (state.currentStudioStep === 4) {
+          switchStudioStep(1);
+        } else {
+          switchStudioStep(4);
         }
+      });
+    }
+
+    // Studio Stepper Events
+    if (elements.studioStepBtns) {
+      elements.studioStepBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const step = Number(btn.getAttribute('data-step'));
+          if (step) switchStudioStep(step);
+        });
+      });
+    }
+
+    document.querySelectorAll('.btn-step-next').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nextStep = Number(btn.getAttribute('data-next-step'));
+        if (nextStep) switchStudioStep(nextStep);
+      });
+    });
+
+    document.querySelectorAll('.btn-step-prev').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prevStep = Number(btn.getAttribute('data-prev-step'));
+        if (prevStep) switchStudioStep(prevStep);
+      });
+    });
+
+    if (elements.btnNewAudioSession) {
+      elements.btnNewAudioSession.addEventListener('click', () => {
+        switchStudioStep(1);
+      });
+    }
+
+    if (elements.btnGoToResult) {
+      elements.btnGoToResult.addEventListener('click', () => {
+        switchStudioStep(4);
       });
     }
   }
@@ -558,9 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab !== 'studio') {
       switchMainTab('studio');
     }
-    if (elements.resultCard && window.innerWidth <= 960) {
-      elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    switchStudioStep(4);
     showToast(t('alertSuccessGenerated'));
   }
 
@@ -585,6 +634,46 @@ document.addEventListener('DOMContentLoaded', () => {
       renderHistoryList();
     } else if (tabId === 'antigravity') {
       checkBridgeStatus();
+    }
+  }
+
+  function switchStudioStep(stepNum) {
+    stepNum = Math.max(1, Math.min(4, Number(stepNum)));
+    state.currentStudioStep = stepNum;
+
+    if (elements.tabContentStudio) {
+      elements.tabContentStudio.setAttribute('data-step', String(stepNum));
+    }
+
+    if (elements.studioStepBtns) {
+      elements.studioStepBtns.forEach(btn => {
+        const bStep = Number(btn.getAttribute('data-step'));
+        const isActive = bStep === stepNum;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.classList.toggle('completed', bStep < stepNum || (bStep === 4 && Boolean(state.rawMarkdownResult)));
+      });
+    }
+
+    // Toggle Go to Result button in Step 3 if result is available
+    if (elements.btnGoToResult) {
+      elements.btnGoToResult.classList.toggle('hidden', !state.rawMarkdownResult);
+    }
+
+    // If mobile quick jump button is visible, update its label and icon
+    if (elements.mobileJumpIcon && elements.txtMobileJump) {
+      if (stepNum === 4) {
+        elements.mobileJumpIcon.textContent = '⬆';
+        elements.txtMobileJump.textContent = t('mobileJumpTop');
+      } else {
+        elements.mobileJumpIcon.textContent = '⬇';
+        elements.txtMobileJump.textContent = t('mobileJump');
+      }
+    }
+
+    // Smooth scroll to top of Studio content when step changes
+    if (window.innerWidth <= 960) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -654,6 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.audioPlayerBox.classList.add('hidden');
       elements.clearAudioBtn.classList.add('hidden');
       elements.audioFileInput.value = '';
+      switchStudioStep(1);
       showToast(state.currentLang === 'my' ? 'အသံဖိုင် ဖယ်ရှားပြီးပါပြီ' : 'Audio cleared');
     });
 
@@ -734,9 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.meetingTitleInput.value = state.currentLang === 'my' ? SAMPLE_MEETING.title : SAMPLE_MEETING.titleEn;
         if (sampleOutput) {
           setGeneratedResult(sampleOutput);
-          if (elements.resultCard && window.innerWidth <= 960) {
-            elements.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+          switchStudioStep(4);
           showToast(state.currentLang === 'my' ? 'နမူနာ အစည်းအဝေး ရလဒ်ကို ဖွင့်ပြထားပါသည်!' : 'Sample meeting minutes loaded!');
         }
       });
@@ -986,9 +1074,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (show) {
       elements.statusBannerTitle.textContent = title;
       elements.statusBanner.classList.remove('hidden');
-      if (elements.statusBanner && window.innerWidth <= 960) {
-        elements.statusBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      switchStudioStep(4);
       [elements.generateBtn, elements.generateAgBtn, elements.btnQuickBridgeRun].forEach(btn => {
         if (btn) {
           btn.disabled = true;
@@ -1010,6 +1096,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.rawMarkdownResult = markdown;
     elements.rawMarkdownEditor.value = markdown;
     state.currentMeetingId = null; // New record
+
+    if (elements.stepResultDot) elements.stepResultDot.classList.remove('hidden');
+    if (elements.btnGoToResult) elements.btnGoToResult.classList.remove('hidden');
 
     // Auto-extract title from top heading if user left meeting title input blank
     if (elements.meetingTitleInput && !elements.meetingTitleInput.value.trim() && markdown) {
@@ -1212,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setGeneratedResult(meeting.content || '');
 
     switchMainTab('studio');
+    switchStudioStep(4);
     showToast(state.currentLang === 'my' ? 'မှတ်တမ်း ပြန်လည်ဖွင့်လိုက်ပါပြီ' : 'Meeting loaded into studio');
   }
 
