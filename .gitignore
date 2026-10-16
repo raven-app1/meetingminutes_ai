@@ -7,3 +7,6 @@ uploads/
 *.log
 server_test.log
 screenshots/
+.pat
+.github_token
+*.token
