@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="my" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MinuteAI — အသံဖိုင်မှ အမှုဆောင် အစည်းအဝေးမှတ်တမ်းများသို့</title>
+  <meta name="description" content="အသံဖိုင်မှ အမှုဆောင် အစည်းအဝေးမှတ်တမ်းများသို့ (agy AI ဖြင့် အစွမ်းထက်ထားသည်)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Vendor Markdown parser: try CDN, app.js falls back to local vendor if offline -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script>
+    if (typeof marked === 'undefined') {
+      document.write('<script src="vendor/marked.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Global App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="8" fill="url(#brand-grad)"/>
+            <path d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14C21 17.866 17.866 21 14 21" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M11 14V14.01M14 11V17M17 13V15" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="14" cy="14" r="1.5" fill="#38BDF8"/>
+            <defs>
+              <linearGradient id="brand-grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#4F46E5"/>
+                <stop offset="0.5" stop-color="#7C3AED"/>
+                <stop offset="1" stop-color="#2563EB"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-wrap">
+            <span class="brand-title">Minute<span class="brand-accent">AI</span></span>
+            <span class="version-badge">v1.0</span>
+          </div>
+          <span class="brand-tagline">အသံဖိုင်မှ အမှုဆောင် အစည်းအဝေးမှတ်တမ်းများသို့ (agy AI ဖြင့် အစွမ်းထက်ထားသည်)</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- System Health Badges -->
+        <div class="system-status-group" id="system-status-group" title="System services status">
+          <div class="status-pill status-agy" id="status-agy">
+            <span class="status-dot"></span>
+            <span class="status-label">agy AI</span>
+            <span class="status-val">စစ်ဆေးနေသည်...</span>
+          </div>
+        </div>
+        <!-- Saved Meetings Drawer Toggle -->
+        <button id="btn-saved-meetings" class="icon-btn saved-meetings-btn" aria-label="Saved meetings" title="သိမ်းဆည်းထားသော အစည်းအဝေးများ / Saved Meetings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span class="saved-meetings-badge" id="saved-meetings-badge" style="display: none;">0</span>
+        </button>
+
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" class="icon-btn lang-toggle-btn" aria-label="Toggle language" title="English ဘာသာသို့ ပြောင်းရန် (Switch to English)">
+          <span class="lang-flag" id="lang-flag">🇺🇸</span>
+          <span class="lang-label" id="lang-label">English</span>
+        </button>
+
+        <button id="theme-toggle-btn" class="icon-btn theme-toggle-btn" aria-label="Toggle dark and light theme" title="Toggle theme (T)">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-main">
+    <div class="content-container">
+
+      <!-- Hero Introduction Banner -->
+      <!-- Hero Introduction Banner (Compact No-Scroll) -->
+      <section class="hero-banner compact-hero">
+        <div class="hero-content">
+          <h1 class="hero-heading">အစည်းအဝေး အသံဖိုင်များကို <span class="gradient-text">အဆင့်မြင့် အမှုဆောင် ဆုံးဖြတ်ချက်မှတ်တမ်းများသို့</span> ပြောင်းလဲပါ</h1>
+          <p class="hero-subtext">
+            အစည်းအဝေး အသံဖိုင်ကို တင်သွင်းပါ သို့မဟုတ် နမူနာဖြင့် စမ်းသပ်ပါ။ အထူးပြု <code>agy</code> multimodal AI အေဂျင်စီများက အသံဖိုင်ကို တိုက်ရိုက်ခွဲခြမ်းစိတ်ဖြာပြီး သက်ဆိုင်သူများအတွက် မဟာဗျူဟာမြောက် မှတ်တမ်းများ ထုတ်ပေးပါသည်။
+          </p>
+        </div>
+      </section>
+
+      <!-- TOP WIZARD PROGRESS NAVIGATION -->
+      <nav class="wizard-nav-stepper" id="wizard-nav-stepper" aria-label="Workflow Steps">
+        <div class="wizard-step-node active" id="wizard-nav-step-1" data-wizard-step="1" tabindex="0" role="button" aria-current="step">
+          <div class="wizard-circle">
+            <span class="wizard-num">1</span>
+            <svg class="wizard-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <span class="wizard-label" id="wizard-label-1">အသံဖိုင် / Audio</span>
+        </div>
+        <div class="wizard-line" id="wizard-line-1"></div>
+
+        <div class="wizard-step-node" id="wizard-nav-step-2" data-wizard-step="2" tabindex="0" role="button">
+          <div class="wizard-circle">
+            <span class="wizard-num">2</span>
+            <svg class="wizard-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <span class="wizard-label" id="wizard-label-2">ပုံစံရွေးချယ်မှု / Persona</span>
+        </div>
+        <div class="wizard-line" id="wizard-line-2"></div>
+
+        <div class="wizard-step-node" id="wizard-nav-step-3" data-wizard-step="3" tabindex="0" role="button">
+          <div class="wizard-circle">
+            <span class="wizard-num">3</span>
+            <svg class="wizard-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <span class="wizard-label" id="wizard-label-3">မှတ်တမ်းထုတ်ယူခြင်း / Processing</span>
+        </div>
+        <div class="wizard-line" id="wizard-line-3"></div>
+
+        <div class="wizard-step-node" id="wizard-nav-step-4" data-wizard-step="4" tabindex="0" role="button">
+          <div class="wizard-circle">
+            <span class="wizard-num">4</span>
+            <svg class="wizard-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <span class="wizard-label" id="wizard-label-4">ရလဒ်များ / Results</span>
+        </div>
+      </nav>
+
+      <!-- Global Alert / Offline Notification Banner (hidden by default) -->
+      <div id="offline-alert" class="alert alert-warning" style="display: none;" role="alert">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-body">
+          <strong>နောက်ခံ ဆာဗာ ချိတ်ဆက်မရပါ:</strong> FastAPI ဆာဗာ ပို့စ် ၈၀၀၀ တွင် လည်ပတ်နေကြောင်း စစ်ဆေးပါ။ ပြန်လည်မချိတ်ဆက်မချင်း လုပ်ဆောင်ချက်များ မအောင်မြင်နိုင်ပါ။
+        </div>
+        <button id="alert-retry-btn" class="btn btn-sm btn-ghost">ပြန်လည်ကြိုးစားရန်</button>
+      </div>
+
+      <div id="setup-section" class="setup-section">
+
+        <!-- STEP 1 VIEW: Audio Input Page -->
+        <div id="wizard-page-1" class="wizard-page active">
+        <section class="step-card" id="step-audio">
+          <div class="step-header">
+            <div class="step-badge">1</div>
+            <div class="step-title-group">
+              <h2 class="step-title">အသံဖိုင် ထည့်သွင်းခြင်း</h2>
+              <p class="step-description">အစည်းအဝေး အသံဖိုင် တင်သွင်းပါ သို့မဟုတ် နမူနာ အစည်းအဝေး စမ်းသပ်ပါ။</p>
+            </div>
+          </div>
+
+          <!-- Input Mode Tabs -->
+          <div class="input-tabs" role="tablist">
+            <button class="tab-btn active" id="tab-btn-upload" role="tab" aria-selected="true" aria-controls="tab-pane-upload">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              အသံဖိုင် တင်သွင်းရန်
+            </button>
+            <button class="tab-btn" id="tab-btn-demo" role="tab" aria-selected="false" aria-controls="tab-pane-demo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              နမူနာ အစည်းအဝေး စမ်းသပ်ရန်
+            </button>
+          </div>
+
+          <!-- Tab Content Panes -->
+          <div class="tab-content">
+
+            <!-- PANE 1: Upload File -->
+            <div class="tab-pane active" id="tab-pane-upload" role="tabpanel">
+              <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Drop audio file here or click to browse">
+                <input type="file" id="audio-file-input" class="file-input-hidden" accept=".mp3,.wav,.m4a,.webm,.ogg,.flac,.aac,audio/*">
+                <div class="drop-zone-icon">
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                    <path d="M12 12v9"></path>
+                    <path d="m16 16-4-4-4 4"></path>
+                  </svg>
+                </div>
+                <div class="drop-zone-text">
+                  <h3 class="drop-title">အစည်းအဝေး အသံဖိုင်ကို ဤနေရာသို့ ဆွဲထည့်ပါ</h3>
+                  <p class="drop-subtitle">သို့မဟုတ် <span class="browse-link">ကွန်ပျူတာမှ ရွေးချယ်တင်သွင်းပါ</span></p>
+                </div>
+                <div class="format-badges">
+                  <span class="badge">MP3</span>
+                  <span class="badge">WAV</span>
+                  <span class="badge">M4A</span>
+                  <span class="badge">WEBM</span>
+                  <span class="badge">OGG</span>
+                  <span class="badge">FLAC</span>
+                  <span class="badge">AAC</span>
+                </div>
+                <p class="drop-help">အများဆုံး အကြံပြုချက်: 100 MB • agy multimodal AI သည် စကားပြောသူ များပြားသော အသံဖိုင်များကို တိုက်ရိုက်ပိုင်းခြားနိုင်ပါသည်</p>
+              </div>
+            </div>
+
+            <!-- PANE 3: Demo Meeting -->
+            <div class="tab-pane" id="tab-pane-demo" role="tabpanel">
+              <div class="demo-card">
+                <div class="demo-card-icon">⚡</div>
+                <div class="demo-card-body">
+                  <h3 class="demo-card-title">ကြိုတင်ပြင်ဆင်ထားသော AI ထုတ်ကုန် မဟာဗျူဟာနှင့် ဗိသုကာ ညှိနှိုင်းမှု</h3>
+                  <p class="demo-card-text">
+                    မိမိကိုယ်ပိုင် အသံဖိုင် မတင်ဘဲ MinuteAI ကို ချက်ချင်း စမ်းသပ်ကြည့်ပါ။ Sarah Chen, Alex Miller, Elena Rostova နှင့် David Kim တို့၏ Whisper latency လျှော့ချရေး၊ မှတ်ဉာဏ်ထိန်းချုပ်မှုနှင့် cloud ဘတ်ဂျက်ဆိုင်ရာ အမှုဆောင်အစည်းအဝေးကို နမူနာဖော်ပြထားပါသည်။
+                  </p>
+                  <div class="demo-tags">
+                    <span class="badge">စကားပြောသူ ၄ ဦး</span>
+                    <span class="badge">Whisper နှင့် အခြေခံအဆောက်အအုံ</span>
+                    <span class="badge">ကြာချိန် ၁:၃၀ မိနစ်</span>
+                  </div>
+                </div>
+                <div class="demo-card-actions">
+                  <button id="btn-load-demo" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    နမူနာ အစည်းအဝေး အသံဖိုင် ဖွင့်ရန်
+                  </button>
+                </div>
+              </div>
+
+          </div><!-- /tab-content -->
+
+          <!-- Selected Audio Card Preview (Shows after file selected, recorded, or demo loaded) -->
+          <div id="audio-preview-card" class="audio-preview-card" style="display: none;">
+            <div class="preview-card-inner">
+              <div class="audio-meta">
+                <div class="audio-file-icon">🎵</div>
+                <div class="audio-details">
+                  <div class="audio-filename" id="preview-filename">meeting_recording.mp3</div>
+                  <div class="audio-specs">
+                    <span id="preview-filesize">0.0 MB</span>
+                    <span class="spec-dot">•</span>
+                    <span id="preview-duration">00:00</span>
+                    <span class="spec-dot">•</span>
+                    <span class="badge badge-success" id="preview-badge">agy AI အတွက် အသင့်ရှိသည်</span>
+                  </div>
+                </div>
+              </div>
+              <div class="audio-player-wrap">
+                <audio id="audio-element" controls preload="metadata"></audio>
+              </div>
+              <button id="btn-remove-audio" class="btn btn-ghost btn-sm" title="Remove selected audio">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                ပြောင်းလဲမည်
+              </button>
+            </div>
+          </div>
+            <!-- Step 1 Bottom Navigation Bar -->
+            <div class="wizard-bottom-bar wizard-bar-step1">
+              <div class="wizard-status-indicator">
+                <span class="wizard-audio-status-label" id="wizard-audio-status-label">အသံဖိုင်:</span>
+                <span class="wizard-audio-status-val" id="wizard-audio-status-val">ရွေးချယ်ထားခြင်း မရှိပါ</span>
+              </div>
+              <button id="btn-to-step-2" class="btn btn-primary btn-wizard-next">
+                <span class="btn-text">ရှေ့သို့: ပုံစံရွေးချယ်ရန်</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </section>
+        </div><!-- /wizard-page-1 -->
+        <!-- STEP 2 VIEW: Persona & Settings Page -->
+        <div id="wizard-page-2" class="wizard-page" style="display: none;">
+          <!-- STEP 2: AI PERSONA SELECTION -->
+        <section class="step-card" id="step-persona">
+          <div class="step-header">
+            <div class="step-badge">2</div>
+            <div class="step-title-group">
+              <h2 class="step-title">AI ပုံစံနှင့် မှတ်တမ်းပြုစုမှု စတိုင်</h2>
+              <p class="step-description">AI အေဂျင်စီမှ သင်၏ အစည်းအဝေးမှတ်တမ်းကို မည်သို့ စနစ်တကျ ဦးစားပေးစီစဉ်စေလိုကြောင်း ရွေးချယ်ပါ။</p>
+            </div>
+          </div>
+
+          <!-- Persona Grid of 6 Business Styles -->
+          <div class="persona-grid" id="persona-grid" role="radiogroup" aria-label="Meeting minutes personas">
+
+            <!-- Persona 1: Executive Briefing -->
+            <div class="persona-card active" data-persona="executive" role="radio" aria-checked="true" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">👔</div>
+                <span class="persona-badge">အမှုဆောင်အရာရှိချုပ် &amp; VP</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">အမှုဆောင် အကျဉ်းချုပ်</h3>
+              <p class="persona-tagline">မဟာဗျူဟာ အကျဉ်းချုပ်၊ အဓိက ဆုံးဖြတ်ချက်များနှင့် အကျိုးသက်ရောက်မှုများ။</p>
+              <ul class="persona-bullets">
+                <li>တိကျရှင်းလင်းသော အမှုဆောင် မဟာဗျူဟာ ခြုံငုံသုံးသပ်ချက်</li>
+                <li>ချမှတ်ခဲ့သော အဓိက ဆုံးဖြတ်ချက်များနှင့် စီးပွားရေးဆိုင်ရာ အကြောင်းပြချက်များ</li>
+                <li>ဘဏ္ဍာရေး၊ KPI နှင့် စီမံကိန်းမှတ်တိုင်များအပေါ် သက်ရောက်မှု</li>
+              </ul>
+            </div>
+
+            <!-- Persona 2: Formal Corporate Governance -->
+            <div class="persona-card" data-persona="formal" role="radio" aria-checked="false" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">📜</div>
+                <span class="persona-badge">အုပ်ချုပ်မှု</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">တရားဝင် အုပ်ချုပ်မှု / ဒါရိုက်တာဘုတ်</h3>
+              <p class="persona-tagline">အစည်းအဝေး စတင်ခြင်း၊ အဆိုတင်သွင်းခြင်း၊ မဲခွဲဆုံးဖြတ်ချက်များနှင့် ဥပဒေရေးရာ မှတ်တမ်း။</p>
+              <ul class="persona-bullets">
+                <li>အစည်းအဝေး စတင်ခြင်း၊ အထမြောက်မှုနှင့် တက်ရောက်သူ စာရင်း</li>
+                <li>ထောက်ခံအတည်ပြုခဲ့သော အဆိုများနှင့် မဲရလဒ် အသေးစိတ်</li>
+                <li>တရားဝင် ကော်ပိုရိတ် လိုက်နာဆောင်ရွက်မှု မှတ်တမ်း</li>
+              </ul>
+            </div>
+
+            <!-- Persona 3: Action Items & PM Matrix -->
+            <div class="persona-card" data-persona="action_oriented" role="radio" aria-checked="false" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">🚀</div>
+                <span class="persona-badge">Scrum / Agile</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">လုပ်ငန်းတာဝန်များ / PM ဇယား</h3>
+              <p class="persona-tagline">လုပ်ငန်းတာဝန်များ၊ တာဝန်ခံများ၊ သတ်မှတ်ရက်များ၊ ဦးစားပေးနှင့် အတားအဆီးများ။</p>
+              <ul class="persona-bullets">
+                <li>စနစ်တကျ တာဝန်ဇယား - တာဝန်ခံ၊ ပြီးစီးရမည့်ရက်၊ ဦးစားပေးအဆင့်</li>
+                <li>ကြုံတွေ့ရသော အတားအဆီးများ၊ မှီခိုမှုများနှင့် အရေးကြီးသော လမ်းကြောင်း</li>
+                <li>Sprint ပေးပို့ရမည့် ရလဒ်များနှင့် ပြန်လည်သုံးသပ်ချက် အဆင့်များ</li>
+              </ul>
+            </div>
+
+            <!-- Persona 4: Technical & Engineering Deep-Dive -->
+            <div class="persona-card" data-persona="technical" role="radio" aria-checked="false" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">💻</div>
+                <span class="persona-badge">အင်ဂျင်နီယာ</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">နည်းပညာနှင့် ဗိသုကာဆိုင်ရာ</h3>
+              <p class="persona-tagline">စနစ်ဗိသုကာ ဆုံးဖြတ်ချက်များ၊ RFC ညှိနှိုင်းမှုများ၊ လုံခြုံရေးနှင့် ကုဒ်သတ်မှတ်ချက်များ။</p>
+              <ul class="persona-bullets">
+                <li>RFC အဆိုပြုချက်များနှင့် ဗိသုကာဆိုင်ရာ ရွေးချယ်မှုများ</li>
+                <li>အခြေခံအဆောက်အအုံ၊ လုံခြုံရေးနှင့် ချဲ့ထွင်နိုင်စွမ်းဆိုင်ရာ မှတ်စုများ</li>
+                <li>လက်တွေ့ကျသော အင်ဂျင်နီယာ တာဝန်များနှင့် နည်းပညာကြွေးမြီများ</li>
+              </ul>
+            </div>
+
+            <!-- Persona 5: Brainstorming & Strategy Workshop -->
+            <div class="persona-card" data-persona="brainstorming" role="radio" aria-checked="false" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">💡</div>
+                <span class="persona-badge">တီထွင်ဆန်းသစ်မှု</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">အကြံဥာဏ်ဖလှယ်ခြင်းနှင့် ဆွေးနွေးပွဲ</h3>
+              <p class="persona-tagline">ခေါင်းစဉ်အလိုက် စုစည်းမှုများ၊ ဆွေးနွေးချက်များ၊ အားသာချက်/အားနည်းချက်များနှင့် အကြံသစ်များ။</p>
+              <ul class="persona-bullets">
+                <li>အကြံဥာဏ်သစ်များကို ခေါင်းစဉ်အလိုက် စနစ်တကျ စုစည်းခြင်း</li>
+                <li>အားသာချက်၊ အားနည်းချက်နှင့် လက်တွေ့ဖြစ်နိုင်ခြေ သုံးသပ်ခြင်း</li>
+                <li>စမ်းသပ်အဆင့် စိတ်ကူးသစ်များနှင့် သုတေသနယူဆချက်များ</li>
+              </ul>
+            </div>
+
+            <!-- Persona 6: Client & Stakeholder Review -->
+            <div class="persona-card" data-persona="client_stakeholder" role="radio" aria-checked="false" tabindex="0">
+              <div class="persona-card-header">
+                <div class="persona-icon">🤝</div>
+                <span class="persona-badge">ဖောက်သည် ဆက်ဆံရေး</span>
+                <span class="selected-checkmark">✓</span>
+              </div>
+              <h3 class="persona-name">ဖောက်သည်နှင့် အစုရှယ်ယာရှင် သုံးသပ်ချက်</h3>
+              <p class="persona-tagline">ဖောက်သည် လိုအပ်ချက်များ၊ ပေးထားသော ကတိကဝတ်များနှင့် နောက်ဆက်တွဲ ဆောင်ရွက်ချက်များ။</p>
+              <ul class="persona-bullets">
+                <li>ဖောက်သည်၏ တိုက်ရိုက်တောင်းဆိုချက်များနှင့် တုံ့ပြန်ချက်များ</li>
+                <li>သဘောတူညီထားသော စာချုပ်ပါ သတ်မှတ်ရက်များနှင့် ပေးပို့ရမည့်ရက်များ</li>
+                <li>လုပ်ငန်းဆိုင်ရာ ဆက်ဆံရေးအခြေအနေနှင့် နောက်ဆက်တွဲ လုပ်ငန်းစဉ်များ</li>
+              </ul>
+            </div>
+
+          </div><!-- /persona-grid -->
+
+          <!-- Collapsible Advanced Settings Accordion -->
+          <div class="advanced-settings-accordion">
+            <button class="accordion-toggle" id="accordion-toggle" aria-expanded="false" aria-controls="advanced-panel">
+              <span class="accordion-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                အဆင့်မြင့် အစည်းအဝေး ဆက်တင်များ
+              </span>
+              <span class="accordion-sub">ခေါင်းစဉ်၊ တက်ရောက်သူများ၊ AI အထူးညွှန်ကြားချက်များ၊ AI မော်ဒယ်</span>
+              <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+
+            <div class="accordion-panel" id="advanced-panel" style="display: none;">
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label for="input-meeting-title" class="form-label" id="label-meeting-title">အစည်းအဝေး ခေါင်းစဉ် / အကြောင်းအရာ</label>
+                  <input type="text" id="input-meeting-title" class="form-control" placeholder="ဥပမာ - စတုတ္ထသုံးလပတ် မဟာဗျူဟာနှင့် AI စီမံကိန်း">
+                </div>
+                <div class="form-group col-6">
+                  <label for="input-meeting-date" class="form-label" id="label-meeting-date">အစည်းအဝေး နေ့စွဲ (Meeting Date)</label>
+                  <input type="date" id="input-meeting-date" class="form-control">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-12">
+                  <label for="input-meeting-attendees" class="form-label" id="label-meeting-attendees">တက်ရောက်သူများနှင့် အခန်းကဏ္ဍများ</label>
+                  <input type="text" id="input-meeting-attendees" class="form-control" placeholder="ဥပမာ - ဒေါ်လှလှ (VP)၊ ဦးကျော် (Lead Arch)၊ ဒေါ်မြ (PM)">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="input-custom-instructions" class="form-label">AI အေဂျင်စီအတွက် အထူးညွှန်ကြားချက်များ</label>
+                <textarea id="input-custom-instructions" class="form-control" rows="2" placeholder="ဥပမာ - ဘတ်ဂျက်ကတိကဝတ်များကို အလေးပေးဖော်ပြပါ၊ ပြောင်းလဲမှုအန္တရာယ်များကို အလံပြပါ၊ ဆုံးဖြတ်ချက်များကို အမှတ်ပေးဇယားဖြင့် ပြုစုပါ။"></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label for="select-ai-model" class="form-label">AI မှတ်တမ်းပြုစုမှု မော်ဒယ် (agy)</label>
+                  <select id="select-ai-model" class="form-select">
+                    <option value="gemini-3.8-flash-medium" selected>gemini-3.8-flash-medium (Fast, Balanced Executive Minutes)</option>
+                    <option value="gemini-3.8-flash-high">gemini-3.8-flash-high (Deep Reasoning, Max Detail)</option>
+                    <option value="claude-sonnet-4-6">claude-sonnet-4-6 (Anthropic Claude Sonnet 4.6)</option>
+                  </select>
+                </div>
+                <div class="form-group col-6 form-hint-group">
+                  <div class="model-note">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <span>မော်ဒယ်များသည် စနစ်၏ <code>agy</code> agent မှတစ်ဆင့် streaming telemetry ဖြင့် ဒေသတွင်း တိုက်ရိုက်လည်ပတ်ပါသည်။</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+            <!-- Step 2 Bottom Navigation Bar -->
+            <div class="wizard-bottom-bar wizard-bar-step2">
+              <button id="btn-to-step-1" class="btn btn-secondary btn-wizard-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span class="btn-text">နောက်သို့: အသံဖိုင်</span>
+              </button>
+              <div class="wizard-chips-center action-summary">
+                <div class="summary-item chip-audio">
+                  <span class="summary-label">အသံဖိုင်:</span>
+                  <span class="summary-value" id="summary-audio-val">ရွေးချယ်ထားခြင်း မရှိပါ</span>
+                </div>
+                <div class="summary-divider">•</div>
+                <div class="summary-item chip-persona">
+                  <span class="summary-label">ပုံစံ:</span>
+                  <span class="summary-value" id="summary-persona-val">အမှုဆောင် အကျဉ်းချုပ်</span>
+                </div>
+              </div>
+              <button id="btn-generate" class="btn btn-primary btn-generate" disabled>
+                <span class="btn-sparkle">✨</span>
+                <span class="btn-text">အစည်းအဝေး မှတ်တမ်း ထုတ်ယူမည်</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+            </div>
+          </section>
+        </div><!-- /wizard-page-2 -->
+
+        <!-- Hidden Action Bar for backwards compatibility -->
+        <div class="action-bar" style="display: none;" aria-hidden="true"></div>
+
+      </div><!-- /setup-section -->
+
+        <!-- STEP 3 VIEW: Live Processing Page -->
+        <div id="wizard-page-3" class="wizard-page" style="display: none;">
+          <!-- STEP 3: REAL-TIME PROGRESS & STEPPER (Shown while job is running) -->
+          <section class="step-card progress-card" id="step-progress" style="display: none;">
+        <div class="progress-card-header">
+          <div class="progress-title-wrap">
+            <div class="spinner-dot"></div>
+            <h2 class="step-title">အစည်းအဝေး မှတ်တမ်း ပြုစုနေသည်</h2>
+          </div>
+          <div class="progress-meta">
+            <span class="elapsed-badge" id="progress-elapsed">ကြာမြင့်ချိန်: 00:00</span>
+            <span class="job-id-badge" id="progress-job-id">အလုပ်အမှတ်: ...</span>
+        </div>
+
+        <!-- 4-Step Visual Stepper -->
+        <div class="stepper-track" id="stepper-track">
+          <div class="stepper-step" id="step-node-1" data-step="1">
+            <div class="step-circle">
+              <span class="step-num">1</span>
+              <svg class="step-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <span class="step-text">အသံဖိုင် တင်သွင်းခြင်း</span>
+          </div>
+          <div class="stepper-line" id="step-line-1"></div>
+
+          <div class="stepper-step" id="step-node-2" data-step="2">
+            <div class="step-circle">
+              <span class="step-num">2</span>
+              <svg class="step-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <span class="step-text">agy အသံဖိုင် သုံးသပ်ခြင်း</span>
+          </div>
+          <div class="stepper-line" id="step-line-2"></div>
+
+          <div class="stepper-step" id="step-node-3" data-step="3">
+            <div class="step-circle">
+              <span class="step-num">3</span>
+              <svg class="step-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <span class="step-text">agy မှတ်တမ်း ပြုစုခြင်း</span>
+          </div>
+          <div class="stepper-line" id="step-line-3"></div>
+
+          <div class="stepper-step" id="step-node-4" data-step="4">
+            <div class="step-circle">
+              <span class="step-num">4</span>
+              <svg class="step-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <span class="step-text">မှတ်တမ်း ပြီးစီးခြင်း</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-shell">
+          <div class="progress-bar-fill" id="progress-bar-fill" style="width: 5%;">
+            <div class="progress-shimmer"></div>
+          </div>
+        </div>
+
+        <!-- Live Message Log -->
+        <div class="progress-status-row">
+          <span class="progress-message" id="progress-message">လုပ်ငန်းစဉ် စတင်နေသည်...</span>
+          <span class="progress-percent" id="progress-percent">5%</span>
+        </div>
+      </section>
+        </div><!-- /wizard-page-3 -->
+
+        <!-- STEP 4 VIEW: Results Workspace Page -->
+        <div id="wizard-page-4" class="wizard-page" style="display: none;">
+
+      <!-- STEP 4: RESULTS WORKSPACE (Shown when completed) -->
+      <section class="results-workspace" id="results-workspace" style="display: none;">
+
+        <!-- Workspace Meta Header -->
+        <div class="workspace-header">
+          <div class="workspace-title-group">
+            <div class="workspace-title-row">
+              <h2 class="workspace-title" id="results-meeting-title" title="ခေါင်းစဉ် ပြင်ဆင်ရန် နှိပ်ပါ">အမှုဆောင် အစည်းအဝေး မှတ်တမ်း</h2>
+              <button id="btn-rename-title" class="icon-btn-inline" title="ခေါင်းစဉ် အမည်ပြောင်းရန် / Rename Meeting" aria-label="Rename meeting">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <span class="badge badge-persona" id="results-persona-badge">အမှုဆောင် အကျဉ်းချုပ်</span>
+              <span class="badge badge-model" id="results-model-badge">gemini-3.8-flash-medium</span>
+            </div>
+            <div class="workspace-meta-sub">
+              <span id="results-date-stamp">Oct 12, 2026</span>
+              <span class="meta-dot">•</span>
+              <span id="results-attendees-display">တက်ရောက်သူများ - အဖွဲ့လိုက် ညှိနှိုင်းမှု</span>
+              <span class="meta-dot">•</span>
+              <span id="results-duration-display">Generated in 18s</span>
+            </div>
+          </div>
+
+          <div class="workspace-top-actions">
+            <!-- Regenerate with Different Persona Quick Selector -->
+            <div class="regen-group">
+              <label for="regen-persona-select" class="regen-label">အခြားပုံစံဖြင့် ပြန်ထုတ်ရန်:</label>
+              <select id="regen-persona-select" class="form-select select-sm">
+                <option value="executive">အမှုဆောင် အကျဉ်းချုပ်</option>
+                <option value="formal">တရားဝင် အုပ်ချုပ်မှု / ဒါရိုက်တာဘုတ်</option>
+                <option value="action_oriented">လုပ်ငန်းတာဝန်များ / PM ဇယား</option>
+                <option value="technical">နည်းပညာနှင့် ဗိသုကာဆိုင်ရာ</option>
+                <option value="brainstorming">အကြံဥာဏ်ဖလှယ်ခြင်းနှင့် ဆွေးနွေးပွဲ</option>
+                <option value="client_stakeholder">ဖောက်သည်နှင့် အစုရှယ်ယာရှင် သုံးသပ်ချက်</option>
+              </select>
+              <button id="btn-regen-persona" class="btn btn-secondary btn-sm" title="Re-prompt agy using this persona without re-uploading audio">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                ပြောင်းလဲမည်
+              </button>
+            </div>
+            <!-- Save Meeting Button -->
+            <button id="btn-save-meeting" class="btn btn-secondary btn-sm" title="Save meeting to browser storage / အစည်းအဝေး သိမ်းဆည်းမည်">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span id="btn-save-meeting-text">သိမ်းဆည်းမည်</span>
+            </button>
+
+            <!-- Start New Meeting Button -->
+            <button id="btn-new-meeting" class="btn btn-ghost btn-sm" title="Upload another recording">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              အစည်းအဝေး အသစ်
+            </button>
+          </div>
+        </div>
+
+        <!-- Workspace Tabs & Toolbar -->
+        <div class="workspace-nav-bar">
+          <div class="workspace-tabs" role="tablist">
+            <button class="wtab-btn active" id="wtab-minutes" data-tab="minutes-en" role="tab" aria-selected="true" aria-controls="pane-minutes" title="English Minutes">
+              <span class="tab-flag">🇬🇧</span>
+              <span class="tab-label" id="tab-label-minutes-en">English Minutes</span>
+            </button>
+            <button class="wtab-btn" id="wtab-minutes-my" data-tab="minutes-my" role="tab" aria-selected="false" aria-controls="pane-minutes-my" title="Burmese Minutes">
+              <span class="tab-flag">🇲🇲</span>
+              <span class="tab-label" id="tab-label-minutes-my">မြန်မာဘာသာ မှတ်တမ်း</span>
+            </button>
+            <button class="wtab-btn" id="wtab-transcript" data-tab="transcript" role="tab" aria-selected="false" aria-controls="pane-transcript" title="Audio Transcript">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span class="tab-label" id="tab-label-transcript">အသံဖိုင် စာသားမှတ်တမ်း</span>
+              <span class="tab-count-badge" id="transcript-segment-count">0</span>
+            </button>
+          </div>
+          <!-- Minutes Toolbar Actions -->
+          <div class="workspace-toolbar" id="minutes-toolbar">
+            <button id="btn-toggle-edit" class="btn btn-secondary btn-sm" title="Edit generated Markdown directly">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span id="btn-toggle-edit-label">မှတ်တမ်း ပြင်ဆင်ရန်</span>
+            </button>
+
+            <button id="btn-copy-md" class="btn btn-secondary btn-sm" title="Copy raw Markdown to clipboard">
+              <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Markdown ကူးယူမည်
+            </button>
+
+            <button id="btn-copy-text" class="btn btn-secondary btn-sm" title="Copy stripped plain text">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              စာသား ကူးယူမည်
+            </button>
+
+            <button id="btn-download-md" class="btn btn-secondary btn-sm" title="Download Markdown file (.md)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              .MD ရယူရန်
+            </button>
+
+            <button id="btn-download-txt" class="btn btn-secondary btn-sm" title="Download Plain Text file (.txt)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              .TXT ရယူရန်
+            </button>
+
+            <button id="btn-print-pdf" class="btn btn-secondary btn-sm" title="Print or save as clean PDF">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              ပုံနှိပ် / PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Pane 1: Rendered English Minutes + Editor -->
+        <div class="workspace-pane active" id="pane-minutes" data-pane="minutes-en" role="tabpanel">
+          <!-- View Mode: Formatted Markdown Render -->
+          <article class="markdown-preview printable-area" id="markdown-preview" aria-label="English meeting minutes rendered output">
+            <!-- Dynamically injected English rendered HTML -->
+          </article>
+
+          <!-- Edit Mode: Markdown Editor Container -->
+          <div class="editor-container" id="editor-container" style="display: none;">
+            <div class="editor-toolbar">
+              <span class="editor-toolbar-hint">Edit English markdown directly below, then click "Apply Changes" to re-render.</span>
+              <div class="editor-toolbar-actions">
+                <button id="btn-cancel-edit" class="btn btn-ghost btn-sm">Cancel</button>
+                <button id="btn-save-edit" class="btn btn-primary btn-sm">Apply Changes</button>
+              </div>
+            </div>
+            <textarea id="markdown-textarea" class="markdown-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <!-- Pane 2: Rendered Burmese Minutes + Editor -->
+        <div class="workspace-pane" id="pane-minutes-my" data-pane="minutes-my" role="tabpanel" style="display: none;">
+          <!-- View Mode: Formatted Markdown Render -->
+          <article class="markdown-preview printable-area" id="markdown-preview-my" aria-label="Burmese meeting minutes rendered output">
+            <!-- Dynamically injected Burmese rendered HTML -->
+          </article>
+
+          <!-- Edit Mode: Markdown Editor Container -->
+          <div class="editor-container" id="editor-container-my" style="display: none;">
+            <div class="editor-toolbar">
+              <span class="editor-toolbar-hint">အောက်တွင် မြန်မာဘာသာ markdown ကို တိုက်ရိုက်ပြင်ဆင်နိုင်ပြီး "အပြောင်းအလဲ သိမ်းဆည်းမည်" ကို နှိပ်ပါ။</span>
+              <div class="editor-toolbar-actions">
+                <button id="btn-cancel-edit-my" class="btn btn-ghost btn-sm">မလုပ်တော့ပါ</button>
+                <button id="btn-save-edit-my" class="btn btn-primary btn-sm">အပြောင်းအလဲ သိမ်းဆည်းမည်</button>
+              </div>
+            </div>
+            <textarea id="markdown-textarea-my" class="markdown-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <!-- Pane 2: Transcript with Search & Audio Synchronization -->
+        <div class="workspace-pane" id="pane-transcript" role="tabpanel" style="display: none;">
+          <div class="transcript-controls">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="transcript-search-input" placeholder="စာသားမှတ်တမ်းတွင် စကားလုံး သို့မဟုတ် ပြောသူ ရှာဖွေရန်...">
+              <button id="btn-clear-search" class="icon-btn-inline" style="display: none;" title="Clear search">✕</button>
+            </div>
+            <div class="transcript-actions">
+              <span class="search-count" id="search-match-count"></span>
+              <button id="btn-copy-transcript" class="btn btn-secondary btn-sm" title="Copy transcript to clipboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                စာသားမှတ်တမ်း ကူးယူမည်
+              </button>
+            </div>
+          </div>
+
+          <!-- Segments Timeline View -->
+          <div class="transcript-timeline" id="transcript-timeline">
+            <!-- Dynamically populated speaker segments -->
+          </div>
+        </div>
+
+      </section><!-- /results-workspace -->
+        </div><!-- /wizard-page-4 -->
+
+    </div><!-- /content-container -->
+  </main>
+  <!-- Global Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <span>MinuteAI Enterprise • agy Multimodal AI &amp; Agentic Orchestration</span>
+      <span class="footer-links">
+        <a href="#step-audio">New Upload</a>
+        <span class="footer-sep">•</span>
+        <a href="https://github.com" target="_blank" rel="noopener">Documentation</a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Saved Meetings Drawer / Modal -->
+  <div id="saved-meetings-modal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="saved-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <h3 id="saved-modal-title">သိမ်းဆည်းထားသော အစည်းအဝေးများ</h3>
+        </div>
+        <button id="btn-close-saved-modal" class="icon-btn-close" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body" id="saved-meetings-list">
+        <!-- Dynamically rendered saved meetings -->
+      </div>
+      <div class="modal-footer">
+        <span class="modal-hint" id="saved-modal-hint">အစည်းအဝေးများကို ဘရောက်ဆာ Local Storage တွင် အလိုအလျောက် သိမ်းဆည်းထားပါသည်</span>
+        <button id="btn-clear-all-saved" class="btn btn-ghost btn-sm" style="display: none;">အားလုံး ဖျက်မည်</button>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
